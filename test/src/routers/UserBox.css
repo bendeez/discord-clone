@@ -1,0 +1,45 @@
+.username-container{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:1rem;
+    background-color:#36393f;
+    height:3rem
+}
+.username-container img{
+    width:3rem;
+    border-radius:50%;;
+    height:3rem
+}
+.username-container p{
+    color:white;
+    font-weight:bold;
+    max-width:5rem;
+    overflow:hidden
+}
+.username-box{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:1rem;
+    cursor:pointer;
+    border-radius:10%;
+    padding:.1rem
+}
+.username-box:hover{
+    background-color:rgba(128, 128, 128, 0.2);
+}
+.icons{
+    display:flex;
+    gap:.5rem;
+    cursor:pointer
+}
+.icons svg{
+    padding:.1rem;
+    color:white
+}
+.icons svg:hover{
+    background-color:rgba(128, 128, 128, 0.2);
+    border-radius:10%;
+}

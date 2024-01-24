@@ -1,0 +1,37 @@
+.server-users{
+    background-color:#36393f
+}
+.server-role{
+    text-align:left;
+    font-weight:bold;
+    color:lightgray;
+    font-size:.75rem
+}
+.server-users-container{
+    margin-top:2rem
+}
+.server-users-list-offline{
+    opacity:.4
+}
+.server-user{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    padding:.5rem;
+    cursor:pointer
+}
+.server-user:hover{
+    background-color:rgba(128, 128, 128, 0.2)
+}
+.server-user-profile{
+    position:relative
+}
+.server-user img{
+    width:3rem;
+    border-radius:50%;
+    height:3rem
+}
+.server-user p{
+    text-align:left;
+    color:white
+}

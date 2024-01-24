@@ -1,0 +1,5 @@
+.discord-server-container{
+    display:grid;
+    grid-template-columns: 14% 68% 18%;
+    height:100vh
+}

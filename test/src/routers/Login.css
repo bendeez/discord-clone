@@ -1,0 +1,91 @@
+*{
+    margin:0;
+    font-family: 'Roboto', sans-serif
+}
+.error{
+    color:red !important;
+    font-style:italic;
+    font-size:.7rem
+}
+.login-background{
+    height:100vh;
+    width:100%
+}
+.login-container{
+    position:absolute;
+    top:25%;
+    right:30%;
+    width:50rem;
+    display:grid;
+    grid-template-columns:60% 40%;
+    height:25rem;
+    border-radius:2.5%;
+    background-color:#36393f;
+    box-shadow:0 0 .7rem rgba(0, 0, 0, 0.5)
+}
+.login h2,p{
+    text-align:center;
+    margin:.5rem
+}
+.login h2{
+    font-weight:bold;
+    color:white
+}
+.login p{
+    color:#cccccc
+}
+.login-form{
+    display:flex;
+    flex-direction:column;
+    padding:1rem
+}
+.login-form input{
+    height:2rem;
+    border-radius:2.5%;
+    border:none;
+    background-color:#23272A;
+    color:white;
+    padding-left:.5rem
+}
+.login-form input:focus{
+    outline:none
+}
+.login-form label{
+    font-size:.7rem;
+    margin-bottom:.5rem;
+    margin-top:1rem;
+    color:white;
+}
+.forgot-password{
+    cursor:pointer;
+    color:#87CEFA !important
+}
+.forgot-password:hover{
+    text-decoration:underline
+}
+.login-form button{
+    background-color: #87CEFA;
+    height:2.5rem;
+    color:white;
+    font-weight:bold;
+    border:none;
+    cursor:pointer;
+    border-radius:2.5%;
+    margin-top:1rem
+}
+.login-form button:hover{
+    filter: brightness(.7)
+}
+.new-account{
+    color:white !important
+}
+.new-account a{
+    text-decoration:none
+}
+.register-link{
+    color:#87CEFA;
+    cursor:pointer;
+}
+.register-link:hover{
+    text-decoration:underline
+}

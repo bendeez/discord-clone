@@ -1,0 +1,86 @@
+.servers-dms{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    background-color:#23272A;
+}
+.servers-dms-container{
+    max-height:51rem;
+    overflow:scroll;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+.servers-dms img{
+    width:3rem;
+    border-radius:50%;
+    margin-top:.5rem;
+    cursor:pointer;
+    height:3rem
+}
+.notifications{
+    border-bottom:.2rem solid rgba(128, 128, 128, 0.2);
+    min-width:3rem;
+    padding:.5rem
+}
+.notification{
+    position:relative;
+    cursor:pointer
+}
+.server{
+    position:relative;
+    cursor:pointer
+}
+.message-count{
+    position:absolute;
+    top:70%;
+    left:65%;
+    width:1rem;
+    background-color:red;
+    color:white;
+    font-weight:bold;
+    text-align:center;
+    border-radius:50%;
+}
+.notification-username{
+    position:absolute;
+    top:42%;
+    left:120%;
+    background-color:black;
+    border-radius:.2rem;
+    box-shadow:0 0 .3rem black;
+    z-index:1
+}
+.server-name{
+    position:absolute;
+    top:42%;
+    left:120%;
+    background-color:black;
+    border-radius:.2rem;
+    box-shadow:0 0 .3rem black;
+    z-index:1
+}
+.server-name p{
+    color:white;
+    font-weight:bold;
+}
+.notification-username p{
+    color:white;
+    font-weight:bold;
+}
+.add-server{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background-color:#2e3136;
+    width:3rem;
+    height:3rem;
+    border-radius:50%;
+    cursor:pointer;
+    color:green
+}
+.add-server:hover{
+    background-color:green;
+    color:white
+}
+

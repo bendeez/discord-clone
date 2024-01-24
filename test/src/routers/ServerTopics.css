@@ -1,0 +1,23 @@
+.server-topics{
+    background-color:#2e3136;
+}
+.server-title{
+    border-bottom:.1rem solid #23272A
+}
+.server-title p{
+    color:white;
+    font-weight:bold;
+    font-size:1.1rem;
+    padding:.2rem
+}
+.server-channels{
+    min-height:53rem;
+}
+.server-channels p{
+    text-align:left;
+    color:white;
+    cursor:pointer;
+    padding:.1rem;
+    border-radius:.2rem;
+    background-color:rgba(128, 128, 128, 0.2)
+}
