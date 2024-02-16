@@ -1,7 +1,8 @@
 from fastapi import APIRouter,Depends
 from app.schemas import Notification
 from app.database import get_db
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app import models,oauth
 
 
@@ -9,16 +10,18 @@ router = APIRouter()
 
 
 @router.get("/notifications")
-def get_notifications(current_user: models.Users = Depends(oauth.get_current_user), db:Session = Depends(get_db)):
-    notifications = db.query(models.Notifications.id, models.Notifications.dm, models.Notifications.count,
+async def get_notifications(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+    notifications = await db.execute(select(models.Notifications.id, models.Notifications.dm, models.Notifications.count,
                              models.Notifications.receiver, models.Users.username, models.Users.profile).join(
                              models.Users, models.Users.username == models.Notifications.sender).filter(
-                             models.Notifications.receiver == current_user.username).all()
+                             models.Notifications.receiver == current_user.username))
+    notifications = notifications.all()
     notifications_json = [{"dm":notification.dm,"count":notification.count,"sender":notification.username,"profile":notification.profile} for notification in notifications]
     return notifications_json
 @router.delete("/notification")
-def delete_notification(notification:Notification, current_user: models.Users = Depends(oauth.get_current_user), db:Session = Depends(get_db)):
-    notification = db.query(models.Notifications).filter(models.Notifications.dm == notification.id).first()
+async def delete_notification(notification:Notification, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+    notification = await db.execute(select(models.Notifications).filter(models.Notifications.dm == notification.id))
+    notification = notification.scalars().first()
     if notification:
-        db.delete(notification)
-        db.commit()
+        await db.delete(notification)
+        await db.commit()
