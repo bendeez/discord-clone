@@ -13,13 +13,15 @@ import firebase
 import json
 from datetime import datetime
 import asyncio
+import os
+from dotenv import load_dotenv
 
-
+load_dotenv()
 router = APIRouter()
 redis_client = redis.Redis(host="localhost",port=6379,db=0,decode_responses=True)
 producer = KafkaProducer(bootstrap_servers="localhost:29092")
 firebase_config = {
-  "apiKey": "AIzaSyAzMDQN8pLjF0psYBmwwO9eN9femEEv6rE",
+  "apiKey": os.environ.get("API_KEY"),
   "authDomain": "discord-83cd2.firebaseapp.com",
   "databaseURL": "https://discord-83cd2-default-rtdb.firebaseio.com",
   "projectId": "discord-83cd2",
