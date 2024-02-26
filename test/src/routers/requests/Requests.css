@@ -16,6 +16,10 @@
 .request:hover{
     background-color:rgba(128, 128, 128, 0.2)
 }
+.pending-requests{
+    max-height:47rem;
+    overflow:scroll
+}
 .pending-requests img{
     width:3rem;
     height:3rem;

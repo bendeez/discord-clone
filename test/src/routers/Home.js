@@ -12,27 +12,20 @@ export default function Home(){
     const location = useLocation()
     const token = localStorage.getItem("token")
     const {getUserInformation,username,profile,changeServerWebsocket,showCreateServer} = useContext(Context)
-    useEffect(() => {
-        async function changeStatus(status){
-            const url = "http://127.0.0.1:8000/status"
-            const requestOptions = {
-                  method: 'PUT',
-                  headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},
-                  body:JSON.stringify({"status":status})
-            }
-            const response = await fetch(url,requestOptions)
-        }
 
+    useEffect(() => {
         getUserInformation()
-        changeStatus("online")
-        window.addEventListener("unload",function () {
-            changeStatus("offline")
-        })
     },[])
 
     useEffect(() => {
         if(username){
             const websocket = new WebSocket(`ws://127.0.0.1:8000/ws/server/${token}`)
+            websocket.onopen = () => {
+                websocket.send(JSON.stringify({"chat":"notificationall","type":"status","status":"online","username":username}))
+                window.addEventListener("unload",function () {
+                    websocket.send(JSON.stringify({"chat":"notificationall","type":"status","status":"offline","username":username}))
+                })
+            }
             changeServerWebsocket(websocket)
             return () => {
                 websocket.close()

@@ -78,7 +78,7 @@ export default function Dm(){
                     setDmStatus(message.status)
                 }
             }
-            if(message.chat === "dm" && message.id === id){
+            if(message.chat === "dm" && message.dm === parseInt(id)){
                 setMessages(Messages => (
                 [...Messages.map(prevmessage => (
                     prevmessage.username === message.username ? {...prevmessage,profile:message.profile} : prevmessage
@@ -152,11 +152,11 @@ export default function Dm(){
         const date = new Date()
         if(serverWebsocket){
             if(messageInput && filePreview){
-                serverWebsocket.send(JSON.stringify({"chat":"dm","id":id,"type":"textandfile","text":messageInput,"file":filePreview.src,"filetype":filePreview.type,"otheruser":dmUsername,"username":username,"profile":profile,"date":date}))
+                serverWebsocket.send(JSON.stringify({"chat":"dm","dm":id,"type":"textandfile","text":messageInput,"file":filePreview.src,"filetype":filePreview.type,"otheruser":dmUsername,"username":username,"profile":profile,"date":date}))
             }else if(messageInput){
-                serverWebsocket.send(JSON.stringify({"chat":"dm","id":id,"type":"text","text":messageInput,"otheruser":dmUsername,"username":username,"profile":profile,"date":date}))
+                serverWebsocket.send(JSON.stringify({"chat":"dm","dm":id,"type":"text","text":messageInput,"otheruser":dmUsername,"username":username,"profile":profile,"date":date}))
             }else if(filePreview){
-                serverWebsocket.send(JSON.stringify({"chat":"dm","id":id,"type":"file","file":filePreview.src,"filetype":filePreview.type,"otheruser":dmUsername,"username":username,"profile":profile,"date":date}))
+                serverWebsocket.send(JSON.stringify({"chat":"dm","dm":id,"type":"file","file":filePreview.src,"filetype":filePreview.type,"otheruser":dmUsername,"username":username,"profile":profile,"date":date}))
             }
             setFilePreview(null)
             setMessageInput("")

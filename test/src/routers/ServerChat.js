@@ -48,7 +48,7 @@ export default function ServerChat({serverName}){
     useEffect(() => {
         function onMessage(event){
             const message = JSON.parse(event.data)
-            if(message.chat === "server" && message.id === id){
+            if(message.chat === "server" && message.server === parseInt(id)){
                 if(message.type === "announcement"){
                     getServerUsers(id)
                 }
@@ -124,11 +124,11 @@ export default function ServerChat({serverName}){
         const date = new Date()
         if(serverWebsocket){
             if(messageInput && filePreview){
-                serverWebsocket.send(JSON.stringify({"chat":"server","id":id,"type":"textandfile","text":messageInput,"file":filePreview.src,"filetype":filePreview.type,"username":username,"profile":profile,"date":date}))
+                serverWebsocket.send(JSON.stringify({"chat":"server","server":id,"type":"textandfile","text":messageInput,"file":filePreview.src,"filetype":filePreview.type,"username":username,"profile":profile,"date":date}))
             }else if(messageInput){
-                serverWebsocket.send(JSON.stringify({"chat":"server","id":id,"type":"text","text":messageInput,"username":username,"profile":profile,"date":date}))
+                serverWebsocket.send(JSON.stringify({"chat":"server","server":id,"type":"text","text":messageInput,"username":username,"profile":profile,"date":date}))
             }else if(filePreview){
-                serverWebsocket.send(JSON.stringify({"chat":"server","id":id,"type":"file","file":filePreview.src,"filetype":filePreview.type,"username":username,"profile":profile,"date":date}))
+                serverWebsocket.send(JSON.stringify({"chat":"server","server":id,"type":"file","file":filePreview.src,"filetype":filePreview.type,"username":username,"profile":profile,"date":date}))
             }
             setFilePreview(null)
             setMessageInput("")

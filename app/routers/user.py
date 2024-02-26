@@ -1,11 +1,9 @@
 from fastapi import APIRouter,Depends,HTTPException,status,UploadFile
-from app.schemas import User,Login,Status
+from app.schemas import User,Login
 from app.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app import models,utils,oauth
-from kafka import KafkaProducer
-import json
 import uuid
 import firebase
 import asyncio
@@ -14,7 +12,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 router = APIRouter()
-producer = KafkaProducer(bootstrap_servers="localhost:29092")
 firebase_config = {
   "apiKey": os.environ.get("API_KEY"),
   "authDomain": "discord-83cd2.firebaseapp.com",
@@ -54,11 +51,6 @@ async def login(login:Login,db:AsyncSession = Depends(get_db)):
 @router.get("/usercredentials")
 async def get_user_credentials(current_user: models.Users = Depends(oauth.get_current_user)):
     return {"username":current_user.username,"profile":current_user.profile}
-
-@router.put("/status")
-async def change_status(status:Status, current_user: models.Users = Depends(oauth.get_current_user)):
-    status_json = {"type":"status","status":status.status,"username":current_user.username}
-    producer.send("notifications", json.dumps(status_json).encode("utf-8"))
 
 @router.put("/profilepicture")
 async def update_profile_picture(file:UploadFile, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):

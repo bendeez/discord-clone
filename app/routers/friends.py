@@ -26,7 +26,7 @@ async def accept_friend_request(friend_request:FriendRequest, current_user: mode
 async def get_friends(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
     friends = await db.execute(select(models.Users.profile, models.Users.username,models.Dms.id).join(models.Friends, or_(and_(
         models.Friends.receiver == current_user.username, models.Friends.sender == models.Users.username), and_(
-        models.Friends.sender == current_user.username, models.Friends.receiver == models.Users.username))).join(models.Dms,or_(and_(models.Dms.sender == current_user.username,models.Dms.receiver == models.Users.username),
+        models.Friends.sender == current_user.username, models.Friends.receiver == models.Users.username))).outerjoin(models.Dms,or_(and_(models.Dms.sender == current_user.username,models.Dms.receiver == models.Users.username),
                                                                                                             and_(models.Dms.receiver == current_user.username,models.Dms.sender == models.Users.username))))
     friends = friends.all()
     friends_json = [{"username":friend.username,"profile":friend.profile,"dmid":friend.id,"status":redis_client.get(f"{friend.username}-status") if redis_client.get(f"{friend.username}-status") else "offline"} for friend in friends]

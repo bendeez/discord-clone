@@ -34,23 +34,20 @@ async def get_current_user(token:str = Depends(oauth2_scheme),db:AsyncSession = 
 async def get_websocket_user(websocket:WebSocket,db:AsyncSession = Depends(get_db)):
     websocket_params = websocket.path_params
     token = websocket_params.get("token")
-    if token == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c":
-        return {"user":"server"}
-    else:
-        if token is None:
+    if token is None:
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+    try:
+        payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
+        username = payload.get("username")
+        if username is None:
             raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
-        try:
-            payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
-            username = payload.get("username")
-            if username is None:
-                raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
-            user_data = await db.execute(select(models.Users.username,models.Dms.id.label("dm_id"),models.Server_User.server_id.label("server_id")).select_from(models.Users).outerjoin(models.Dms,or_(models.Dms.sender == username,models.Dms.receiver == username))\
-                                                .outerjoin(models.Server_User,models.Server_User.username == username).filter(models.Users.username == username))
-            user_data = user_data.all()
-            if not user_data:
-                raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
-            user_data_json = {"websocket":websocket,"username": user_data[0].username, "server_ids": list(set(user.server_id for user in user_data)),"dm_ids": list(set(user.dm_id for user in user_data))}
-            return user_data_json
-        except JWTError:
+        user_data = await db.execute(select(models.Users.username,models.Dms.id.label("dm_id"),models.Server_User.server_id.label("server_id")).select_from(models.Users).outerjoin(models.Dms,or_(models.Dms.sender == username,models.Dms.receiver == username))\
+                                            .outerjoin(models.Server_User,models.Server_User.username == username).filter(models.Users.username == username))
+        user_data = user_data.all()
+        if not user_data:
             raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+        user_data_json = {"websocket":websocket,"username": user_data[0].username, "server_ids": list(set(user.server_id for user in user_data)),"dm_ids": list(set(user.dm_id for user in user_data))}
+        return user_data_json
+    except JWTError:
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
 

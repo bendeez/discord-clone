@@ -1,0 +1,454 @@
+Index: app/ServerConnectionManager.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from fastapi import WebSocket\r\nfrom typing import Union\r\n\r\n\r\nclass ServerConnectionManager:\r\n    def __init__(self):\r\n        self.active_connections: list[dict[str,Union[list[int],str,WebSocket]]] = []\r\n    async def connect(self,websocket:WebSocket,current_user:dict):\r\n        await websocket.accept()\r\n        self.active_connections.append(current_user)\r\n    def disconnect(self,websocket:WebSocket,current_user:dict):\r\n        self.active_connections.remove(current_user)\r\n    async def broadcast(self,websocket:WebSocket,data:dict,current_user:dict):\r\n        chat = data.get(\"chat\")\r\n        if chat == \"dm\":\r\n            id = data.get(\"id\")\r\n            if id is not None:\r\n                id = int(id)\r\n                if id in current_user.get(\"dm_ids\",[]) or current_user == {\"user\":\"server\"}:\r\n                    for connection in self.active_connections:\r\n                        if id in connection.get(\"dm_ids\",[]):\r\n                            await connection.get(\"websocket\").send_json(data)\r\n        elif chat == \"server\":\r\n            id = data.get(\"id\")\r\n            if id is not None:\r\n                id = int(id)\r\n                if id in current_user.get(\"server_ids\",[]) or current_user == {\"user\":\"server\"}:\r\n                    for connection in self.active_connections:\r\n                        if id in connection.get(\"server_ids\",[]):\r\n                            await connection.get(\"websocket\").send_json(data)\r\n        elif chat == \"notification\" and current_user == {\"user\":\"server\"}:\r\n            for connection in self.active_connections:\r\n                if data.get(\"receiver\") == connection.get(\"username\"):\r\n                    await connection.get(\"websocket\").send_json(data)\r\n        elif chat == \"notificationall\" and current_user == {\"user\":\"server\"}:\r\n            for connection in self.active_connections:\r\n                if connection != {\"user\":\"server\"}:\r\n                    await connection.get(\"websocket\").send_json(data)\r\n    def add_valid_server_or_dm(self,usernames:list,type,id):\r\n        for connection in self.active_connections:\r\n            if connection.get(\"username\") in usernames:\r\n                if isinstance(connection.get(type),list):\r\n                    connection.get(type).append(int(id))\r\n\r\nserver_manager = ServerConnectionManager()
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/ServerConnectionManager.py b/app/ServerConnectionManager.py
+--- a/app/ServerConnectionManager.py	(revision 5d601e556dfe5a5abc7e371cb6e5b29937fb8565)
++++ b/app/ServerConnectionManager.py	(date 1708395664784)
+@@ -1,7 +1,17 @@
+ from fastapi import WebSocket
+ from typing import Union
++from sqlalchemy.ext.asyncio import AsyncSession
++from datetime import datetime
++from app import models
+ 
+-
++async def save_join_server_message(data:dict,db:AsyncSession):
++    username = data["username"]
++    announcement = data["announcement"]
++    server = data["server"]
++    message = models.Server_Messages(announcement=announcement, username=username, server=int(server),
++                                     created_date=datetime.now())
++    db.add(message)
++    await db.commit()
+ class ServerConnectionManager:
+     def __init__(self):
+         self.active_connections: list[dict[str,Union[list[int],str,WebSocket]]] = []
+@@ -10,32 +20,33 @@
+         self.active_connections.append(current_user)
+     def disconnect(self,websocket:WebSocket,current_user:dict):
+         self.active_connections.remove(current_user)
+-    async def broadcast(self,websocket:WebSocket,data:dict,current_user:dict):
++    async def broadcast(self,websocket:WebSocket,data:dict,current_user:dict,db = None):
+         chat = data.get("chat")
+         if chat == "dm":
+-            id = data.get("id")
+-            if id is not None:
+-                id = int(id)
+-                if id in current_user.get("dm_ids",[]) or current_user == {"user":"server"}:
++            dm = data.get("dm")
++            if dm is not None:
++                dm = int(dm)
++                if dm in current_user.get("dm_ids",[]):
+                     for connection in self.active_connections:
+-                        if id in connection.get("dm_ids",[]):
++                        if dm in connection.get("dm_ids",[]):
+                             await connection.get("websocket").send_json(data)
+         elif chat == "server":
+-            id = data.get("id")
+-            if id is not None:
+-                id = int(id)
+-                if id in current_user.get("server_ids",[]) or current_user == {"user":"server"}:
++            server = data.get("server")
++            if server is not None:
++                server = int(server)
++                if server in current_user.get("server_ids",[]):
+                     for connection in self.active_connections:
+-                        if id in connection.get("server_ids",[]):
++                        if server in connection.get("server_ids",[]):
+                             await connection.get("websocket").send_json(data)
+-        elif chat == "notification" and current_user == {"user":"server"}:
++            if data.get("type") == "announcement":
++                await save_join_server_message(data,db)
++        elif chat == "notification":
+             for connection in self.active_connections:
+                 if data.get("receiver") == connection.get("username"):
+                     await connection.get("websocket").send_json(data)
+-        elif chat == "notificationall" and current_user == {"user":"server"}:
++        elif chat == "notificationall":
+             for connection in self.active_connections:
+-                if connection != {"user":"server"}:
+-                    await connection.get("websocket").send_json(data)
++                await connection.get("websocket").send_json(data)
+     def add_valid_server_or_dm(self,usernames:list,type,id):
+         for connection in self.active_connections:
+             if connection.get("username") in usernames:
+Index: app/models.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from app.database import Base\r\nfrom sqlalchemy.orm import Mapped,mapped_column\r\nfrom datetime import datetime\r\nfrom sqlalchemy import ForeignKey\r\n\r\n\r\nclass Users(Base):\r\n    __tablename__ = \"users\"\r\n    username: Mapped[str] = mapped_column(primary_key=True)\r\n    email: Mapped[str] = mapped_column(nullable=False)\r\n    password: Mapped[str] = mapped_column(nullable=False)\r\n    profile: Mapped[str] = mapped_column(default=\"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/default.png?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8\")\r\n\r\n# class Users(Base):\r\n#     __tablename__ = \"users\"\r\n#     username = Column(String, primary_key=True)\r\n#     email = Column(String,nullable=False)\r\n#     password = Column(String,nullable=False)\r\n#     profile = Column(String,default=\"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/default.png?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8\")\r\n\r\nclass FriendRequests(Base):\r\n    __tablename__ = \"friend-requests\"\r\n    id: Mapped[int] = mapped_column(primary_key=True)\r\n    sender: Mapped[str] = mapped_column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n    receiver: Mapped[str] = mapped_column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n# class FriendRequests(Base):\r\n#     __tablename__ = \"friend-requests\"\r\n#     id = Column(Integer,primary_key=True)\r\n#     sender = Column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n#     receiver = Column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n\r\nclass Friends(Base):\r\n    __tablename__ = \"friends\"\r\n    id: Mapped[int] = mapped_column(primary_key=True)\r\n    sender: Mapped[str] = mapped_column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n    receiver: Mapped[str] = mapped_column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n# class Friends(Base):\r\n#     __tablename__ = \"friends\"\r\n#     id = Column(Integer,primary_key=True)\r\n#     sender = Column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n#     receiver = Column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n\r\nclass Dms(Base):\r\n    __tablename__ = \"dms\"\r\n    id: Mapped[int] = mapped_column(primary_key=True)\r\n    sender: Mapped[str] = mapped_column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n    receiver: Mapped[str] = mapped_column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n# class Dms(Base):\r\n#     __tablename__ = \"dms\"\r\n#     id = Column(Integer,primary_key=True)\r\n#     sender = Column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n#     receiver = Column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n\r\nclass Dm_Messages(Base):\r\n    __tablename__ = \"dm_messages\"\r\n    id: Mapped[int] = mapped_column(primary_key=True)\r\n    link: Mapped[str] = mapped_column()\r\n    text: Mapped[str] = mapped_column()\r\n    file: Mapped[str] = mapped_column()\r\n    filetype: Mapped[str] = mapped_column()\r\n    username: Mapped[str] = mapped_column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n    dm: Mapped[int] = mapped_column(ForeignKey(\"dms.id\",ondelete=\"CASCADE\"))\r\n    serverinviteid: Mapped[int] = mapped_column(ForeignKey(\"server.id\"))\r\n    created_date: Mapped[datetime] = mapped_column(nullable=False)\r\n\r\n# class Dm_Messages(Base):\r\n#     __tablename__ = \"dm_messages\"\r\n#     id = Column(Integer, primary_key=True)\r\n#     link = Column(String)\r\n#     text = Column(String)\r\n#     file = Column(String)\r\n#     filetype = Column(String)\r\n#     username = Column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n#     dm = Column(ForeignKey(\"dms.id\",ondelete=\"CASCADE\"))\r\n#     serverinviteid = Column(ForeignKey(\"server.id\"))\r\n#     created_date = Column(DateTime,nullable=False)\r\n\r\nclass Server_Messages(Base):\r\n    __tablename__ = \"server_messages\"\r\n    id: Mapped[int] = mapped_column(primary_key=True)\r\n    announcement: Mapped[str] = mapped_column()\r\n    text: Mapped[str] = mapped_column()\r\n    file: Mapped[str] = mapped_column()\r\n    filetype: Mapped[str] = mapped_column()\r\n    username: Mapped[str] = mapped_column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n    server: Mapped[int] = mapped_column(ForeignKey(\"server.id\",ondelete=\"CASCADE\"))\r\n    created_date: Mapped[datetime] = mapped_column(nullable=False)\r\n# class Server_Messages(Base):\r\n#     __tablename__ = \"server_messages\"\r\n#     id = Column(Integer, primary_key=True)\r\n#     announcement = Column(String)\r\n#     text = Column(String)\r\n#     file = Column(String)\r\n#     filetype = Column(String)\r\n#     username = Column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n#     server = Column(ForeignKey(\"server.id\", ondelete=\"CASCADE\"))\r\n#     created_date = Column(DateTime, nullable=False)\r\n\r\nclass Notifications(Base):\r\n    __tablename__ = \"notifications\"\r\n    id: Mapped[int] = mapped_column(primary_key=True)\r\n    sender: Mapped[str] = mapped_column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n    receiver: Mapped[str] = mapped_column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n    dm: Mapped[int] = mapped_column(ForeignKey(\"dms.id\", ondelete=\"CASCADE\"))\r\n    count: Mapped[int] = mapped_column(default=1)\r\n# class Notifications(Base):\r\n#     __tablename__ = \"notifications\"\r\n#     id = Column(Integer, primary_key=True)\r\n#     sender = Column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n#     receiver = Column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n#     dm = Column(ForeignKey(\"dms.id\",ondelete=\"CASCADE\"))\r\n#     count = Column(Integer,default=1)\r\n\r\nclass Server(Base):\r\n    __tablename__ = \"server\"\r\n    id: Mapped[int] = mapped_column(primary_key=True)\r\n    owner: Mapped[str] = mapped_column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n    name: Mapped[str] = mapped_column(nullable=False)\r\n    profile: Mapped[str] = mapped_column(default=\"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/default.png?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8\")\r\n\r\n# class Server(Base):\r\n#     __tablename__ = \"server\"\r\n#     id = Column(Integer,primary_key=True)\r\n#     owner = Column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n#     name = Column(String,nullable=False)\r\n#     profile = Column(String,default=\"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/defaultserver.png?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8\")\r\n\r\nclass Server_User(Base):\r\n    __tablename__ = \"server_user\"\r\n    id: Mapped[int] = mapped_column(primary_key=True)\r\n    username: Mapped[str] = mapped_column(ForeignKey(\"users.username\", ondelete=\"CASCADE\"))\r\n    server_id: Mapped[int] = mapped_column(ForeignKey(\"server.id\"))\r\n# class Server_User(Base):\r\n#     __tablename__ = \"server_user\"\r\n#     id = Column(Integer, primary_key=True)\r\n#     username = Column(ForeignKey(\"users.username\",ondelete=\"CASCADE\"))\r\n#     server_id = Column(ForeignKey(\"server.id\",ondelete=\"CASCADE\"))\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/models.py b/app/models.py
+--- a/app/models.py	(revision 5d601e556dfe5a5abc7e371cb6e5b29937fb8565)
++++ b/app/models.py	(date 1708356072815)
+@@ -1,7 +1,7 @@
+ from app.database import Base
+ from sqlalchemy.orm import Mapped,mapped_column
+ from datetime import datetime
+-from sqlalchemy import ForeignKey
++from sqlalchemy import ForeignKey,Column,Integer
+ 
+ 
+ class Users(Base):
+@@ -18,16 +18,16 @@
+ #     password = Column(String,nullable=False)
+ #     profile = Column(String,default="https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/default.png?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8")
+ 
+-class FriendRequests(Base):
+-    __tablename__ = "friend-requests"
+-    id: Mapped[int] = mapped_column(primary_key=True)
+-    sender: Mapped[str] = mapped_column(ForeignKey("users.username",ondelete="CASCADE"))
+-    receiver: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
+ # class FriendRequests(Base):
+ #     __tablename__ = "friend-requests"
+-#     id = Column(Integer,primary_key=True)
+-#     sender = Column(ForeignKey("users.username",ondelete="CASCADE"))
+-#     receiver = Column(ForeignKey("users.username",ondelete="CASCADE"))
++#     id: Mapped[int] = mapped_column(primary_key=True)
++#     sender: Mapped[str] = mapped_column(ForeignKey("users.username",ondelete="CASCADE"))
++#     receiver: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
++class FriendRequests(Base):
++    __tablename__ = "friend-requests"
++    id = Column(Integer,primary_key=True)
++    sender = Column(ForeignKey("users.username",ondelete="CASCADE"))
++    receiver = Column(ForeignKey("users.username",ondelete="CASCADE"))
+ 
+ class Friends(Base):
+     __tablename__ = "friends"
+Index: app/routers/dms.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from fastapi import APIRouter,Depends,HTTPException,status\r\nfrom app.schemas import FriendRequest\r\nfrom app.database import get_db\r\nfrom app.ServerConnectionManager import server_manager\r\nfrom sqlalchemy.ext.asyncio import AsyncSession\r\nfrom sqlalchemy import or_,and_,select\r\nfrom app import models,oauth\r\nfrom kafka import KafkaProducer\r\nimport redis\r\nimport json\r\n\r\nrouter = APIRouter()\r\nredis_client = redis.Redis(host=\"localhost\",port=6379,db=0,decode_responses=True)\r\nproducer = KafkaProducer(bootstrap_servers=\"localhost:29092\")\r\n\r\n@router.post(\"/dm\")\r\nasync def create_dm(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    already_dm = await db.execute(select(models.Dms).filter(or_(and_(models.Dms.sender == current_user.username,\r\n                                                      models.Dms.receiver == friend_request.username),\r\n                                                      and_(models.Dms.receiver == current_user.username,\r\n                                                      models.Dms.sender == friend_request.username))))\r\n    already_dm = already_dm.scalars().first()\r\n    if already_dm:\r\n        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail=\"Already a dm\")\r\n    dm = models.Dms(sender=current_user.username, receiver=friend_request.username)\r\n    db.add(dm)\r\n    await db.commit()\r\n    await db.refresh(dm)\r\n    server_manager.add_valid_server_or_dm([dm.sender,dm.receiver], \"dm_ids\", dm.id)\r\n    dm_json = {\"type\":\"newdm\",\"otheruser\":friend_request.username,\"username\":current_user.username}\r\n    producer.send(\"notifications\",json.dumps(dm_json).encode(\"utf-8\"))\r\n\r\n@router.get(\"/dms\")\r\nasync def get_dms(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    dms = await db.execute(select(models.Users.profile, models.Users.username, models.Dms.id).join(models.Dms, or_(and_(\r\n        models.Dms.receiver == current_user.username, models.Dms.sender == models.Users.username), and_(\r\n        models.Dms.sender == current_user.username, models.Dms.receiver == models.Users.username))).filter(\r\n        models.Users.username != current_user.username))\r\n    dms = dms.all()\r\n    dms_json = [{\"id\":dm.id,\"username\": dm.username,\"profile\":dm.profile,\"status\":redis_client.get(f\"{dm.username}-status\")\r\n    if redis_client.get(f\"{dm.username}-status\") is not None else \"offline\"} for dm in dms]\r\n    return dms_json\r\n\r\n@router.get(\"/dm/{dm}\")\r\nasync def get_dm_information(dm:int, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    in_dm = await db.execute(select(models.Dms).filter(or_(and_(models.Dms.sender == current_user.username,models.Dms.id == dm),\r\n                                            and_(models.Dms.receiver == current_user.username,models.Dms.id == dm))))\r\n    in_dm = in_dm.scalars().first()\r\n    if not in_dm:\r\n        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail=\"You are not a part of this dm\")\r\n    dm = await db.execute(select(models.Users.profile, models.Users.username, models.Dms.id).join(models.Dms, and_(models.Dms.id == dm, or_(and_(\r\n        models.Dms.receiver == current_user.username, models.Dms.sender == models.Users.username), and_(\r\n        models.Dms.sender == current_user.username, models.Dms.receiver == models.Users.username)))).filter(\r\n        models.Users.username != current_user.username))\r\n    dm = dm.first()\r\n    dm_json = {\"id\":dm.id,\"username\":dm.username,\"profile\":dm.profile,\"status\":redis_client.get(f\"{dm.username}-status\")\r\n                if redis_client.get(f\"{dm.username}-status\") is not None else \"offline\"}\r\n    return dm_json\r\n\r\n@router.get(\"/dmmessages/{dm}\")\r\nasync def get_dm_messages(dm:int, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    in_dm = await db.execute(select(models.Dms).filter(or_(and_(models.Dms.sender == current_user.username, models.Dms.id == dm),\r\n                                            and_(models.Dms.receiver == current_user.username,models.Dms.id == dm))))\r\n    in_dm = in_dm.scalars().first()\r\n    if not in_dm:\r\n        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=\"You are not a part of this dm\")\r\n    dm_messages = await db.execute(select(models.Dm_Messages.dm, models.Dm_Messages.username, models.Dm_Messages.link,models.Dm_Messages.text, models.Dm_Messages.file,\r\n                        models.Dm_Messages.created_date, models.Dm_Messages.filetype,models.Dm_Messages.serverinviteid,models.Server.name,\r\n                        models.Server.profile.label(\"serverprofile\"),models.Users.profile)\\\r\n                        .outerjoin(models.Server,models.Server.id == models.Dm_Messages.serverinviteid).join\\\r\n                        (models.Users,models.Dm_Messages.username == models.Users.username)\\\r\n                        .filter(models.Dm_Messages.dm == dm).order_by(models.Dm_Messages.id))\r\n    dm_messages = dm_messages.all()\r\n    dm_messages_json = [{\"dm\":message.dm,\"username\":message.username,\"link\":message.link,\"text\":message.text,\"file\":message.file,\"filetype\":message.filetype,\r\n                         \"date\":message.created_date,\"profile\":message.profile,\"servername\":message.name,\"serverprofile\":message.serverprofile}\r\n                        for message in dm_messages]\r\n    return dm_messages_json\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/routers/dms.py b/app/routers/dms.py
+--- a/app/routers/dms.py	(revision 5d601e556dfe5a5abc7e371cb6e5b29937fb8565)
++++ b/app/routers/dms.py	(date 1708398425128)
+@@ -5,13 +5,10 @@
+ from sqlalchemy.ext.asyncio import AsyncSession
+ from sqlalchemy import or_,and_,select
+ from app import models,oauth
+-from kafka import KafkaProducer
+ import redis
+-import json
+ 
+ router = APIRouter()
+ redis_client = redis.Redis(host="localhost",port=6379,db=0,decode_responses=True)
+-producer = KafkaProducer(bootstrap_servers="localhost:29092")
+ 
+ @router.post("/dm")
+ async def create_dm(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+@@ -24,11 +21,13 @@
+         raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Already a dm")
+     dm = models.Dms(sender=current_user.username, receiver=friend_request.username)
+     db.add(dm)
+-    await db.commit()
+-    await db.refresh(dm)
++    await db.flush()
+     server_manager.add_valid_server_or_dm([dm.sender,dm.receiver], "dm_ids", dm.id)
+-    dm_json = {"type":"newdm","otheruser":friend_request.username,"username":current_user.username}
+-    producer.send("notifications",json.dumps(dm_json).encode("utf-8"))
++    notification = {"chat": "notification", "type": "newdm", "sender": dm.sender, "receiver":dm.receiver}
++    for connection in server_manager.active_connections:
++        if connection.get("username") == current_user.username:
++            await server_manager.broadcast(connection.get("websocket"),notification,connection)
++    await db.commit()
+ 
+ @router.get("/dms")
+ async def get_dms(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+Index: app/routers/friend_requests.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from fastapi import APIRouter,Depends,HTTPException,status\r\nfrom app.schemas import FriendRequest\r\nfrom app.database import get_db\r\nfrom sqlalchemy.ext.asyncio import AsyncSession\r\nfrom sqlalchemy.orm import aliased\r\nfrom sqlalchemy import or_,and_,select\r\nfrom app import models,oauth\r\nfrom kafka import KafkaProducer\r\nimport redis\r\n\r\nrouter = APIRouter()\r\nredis_client = redis.Redis(host=\"localhost\",port=6379,db=0,decode_responses=True)\r\nproducer = KafkaProducer(bootstrap_servers=\"localhost:29092\")\r\n\r\n@router.post(\"/friendrequest\")\r\nasync def send_friend_request(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    if friend_request.username == current_user.username:\r\n        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail=\"Cannot send friend request to yourself\")\r\n    user_exists = await db.execute(select(models.Users).filter(models.Users.username == friend_request.username))\r\n    user_exists = user_exists.scalars().first()\r\n    if not user_exists:\r\n        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail=\"User does not exist\")\r\n    already_sent = await db.execute(select(models.FriendRequests).filter(or_(and_(models.FriendRequests.sender == friend_request.username,\r\n                                                                   models.FriendRequests.receiver == current_user.username),\r\n                                                              and_(\r\n                                                                  models.FriendRequests.receiver == friend_request.username,\r\n                                                                  models.FriendRequests.sender == current_user.username))))\r\n    already_sent = already_sent.scalars().first()\r\n    if already_sent:\r\n        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail=\"Friend request already sent\")\r\n    already_friends = await db.execute(select(models.Friends).filter(or_(and_(models.Friends.sender == current_user.username,\r\n                                                               models.Friends.receiver == friend_request.username),\r\n                                                          and_(models.Friends.receiver == current_user.username,\r\n                                                               models.Friends.sender == friend_request.username))))\r\n    already_friends = already_friends.scalars().all()\r\n    if already_friends:\r\n        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=\"Already friends with that user\")\r\n    request = models.FriendRequests(sender=current_user.username, receiver=friend_request.username)\r\n    db.add(request)\r\n    await db.commit()\r\n\r\n@router.get(\"/friendrequests\")\r\nasync def get_friend_requests(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    receiver_user = aliased(models.Users,name=\"receiver_user\")\r\n    sender_user = aliased(models.Users, name=\"sender_user\")\r\n    friend_requests = await db.execute(select(models.FriendRequests.receiver,models.FriendRequests.sender,models.Users.profile,receiver_user.profile.label(\"receiver_profile\"),sender_user.profile.label(\"sender_profile\"))\\\r\n                                .join(receiver_user,receiver_user.username == models.FriendRequests.receiver).join(sender_user,sender_user.username == models.FriendRequests.sender).filter(\r\n                                or_(models.FriendRequests.receiver == current_user.username,models.FriendRequests.sender == current_user.username)).distinct(models.FriendRequests.receiver,models.FriendRequests.sender))\r\n    friend_requests = friend_requests.all()\r\n    friend_requests_json = [{\"sender\":friend_request.sender,\"receiver\":friend_request.receiver,\"receiverprofile\":friend_request.receiver_profile,\"senderprofile\":friend_request.sender_profile} for friend_request in friend_requests]\r\n    return friend_requests_json\r\n@router.delete(\"/friendrequest\")\r\nasync def delete_friend_request(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    already_friend_request = await db.execute(select(models.FriendRequests).filter(or_(and_(models.FriendRequests.sender == current_user.username, models.FriendRequests.receiver == friend_request.username),\r\n                                                                        and_(models.FriendRequests.receiver == current_user.username,models.FriendRequests.sender == friend_request.username))))\r\n    already_friend_request = already_friend_request.scalars().first()\r\n    if not already_friend_request:\r\n        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=\"Friend request already deleted\")\r\n    await db.delete(already_friend_request)\r\n    await db.commit()
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/routers/friend_requests.py b/app/routers/friend_requests.py
+--- a/app/routers/friend_requests.py	(revision 5d601e556dfe5a5abc7e371cb6e5b29937fb8565)
++++ b/app/routers/friend_requests.py	(date 1708398425112)
+@@ -5,12 +5,10 @@
+ from sqlalchemy.orm import aliased
+ from sqlalchemy import or_,and_,select
+ from app import models,oauth
+-from kafka import KafkaProducer
+ import redis
+ 
+ router = APIRouter()
+ redis_client = redis.Redis(host="localhost",port=6379,db=0,decode_responses=True)
+-producer = KafkaProducer(bootstrap_servers="localhost:29092")
+ 
+ @router.post("/friendrequest")
+ async def send_friend_request(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+@@ -43,9 +41,9 @@
+ async def get_friend_requests(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+     receiver_user = aliased(models.Users,name="receiver_user")
+     sender_user = aliased(models.Users, name="sender_user")
+-    friend_requests = await db.execute(select(models.FriendRequests.receiver,models.FriendRequests.sender,models.Users.profile,receiver_user.profile.label("receiver_profile"),sender_user.profile.label("sender_profile"))\
++    friend_requests = await db.execute(select(models.FriendRequests.receiver,models.FriendRequests.sender,receiver_user.profile.label("receiver_profile"),sender_user.profile.label("sender_profile"))\
+                                 .join(receiver_user,receiver_user.username == models.FriendRequests.receiver).join(sender_user,sender_user.username == models.FriendRequests.sender).filter(
+-                                or_(models.FriendRequests.receiver == current_user.username,models.FriendRequests.sender == current_user.username)).distinct(models.FriendRequests.receiver,models.FriendRequests.sender))
++                                or_(models.FriendRequests.receiver == current_user.username,models.FriendRequests.sender == current_user.username)))
+     friend_requests = friend_requests.all()
+     friend_requests_json = [{"sender":friend_request.sender,"receiver":friend_request.receiver,"receiverprofile":friend_request.receiver_profile,"senderprofile":friend_request.sender_profile} for friend_request in friend_requests]
+     return friend_requests_json
+Index: app/routers/friends.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from fastapi import APIRouter,Depends,HTTPException,status\r\nfrom app.schemas import FriendRequest\r\nfrom app.database import get_db\r\nfrom sqlalchemy.ext.asyncio import AsyncSession\r\nfrom sqlalchemy import or_,and_,select\r\nfrom app import models,oauth\r\nimport redis\r\n\r\nrouter = APIRouter()\r\nredis_client = redis.Redis(host=\"localhost\",port=6379,db=0,decode_responses=True)\r\n\r\n\r\n@router.post(\"/friend\")\r\nasync def accept_friend_request(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    already_friend_request = await db.execute(select(models.FriendRequests).filter(or_(\r\n        models.FriendRequests.sender == current_user.username and models.FriendRequests.receiver == friend_request.username,\r\n        models.FriendRequests.receiver == current_user.username and models.FriendRequests.sender == friend_request.username)))\r\n    already_friend_request = already_friend_request.scalars().first()\r\n    if not already_friend_request:\r\n        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=\"Friend request already deleted\")\r\n    await db.delete(already_friend_request)\r\n    friend = models.Friends(sender=friend_request.username, receiver=current_user.username)\r\n    db.add(friend)\r\n    await db.commit()\r\n@router.get(\"/friends\")\r\nasync def get_friends(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    friends = await db.execute(select(models.Users.profile, models.Users.username,models.Dms.id).join(models.Friends, or_(and_(\r\n        models.Friends.receiver == current_user.username, models.Friends.sender == models.Users.username), and_(\r\n        models.Friends.sender == current_user.username, models.Friends.receiver == models.Users.username))).join(models.Dms,or_(and_(models.Dms.sender == current_user.username,models.Dms.receiver == models.Users.username),\r\n                                                                                                            and_(models.Dms.receiver == current_user.username,models.Dms.sender == models.Users.username))))\r\n    friends = friends.all()\r\n    friends_json = [{\"username\":friend.username,\"profile\":friend.profile,\"dmid\":friend.id,\"status\":redis_client.get(f\"{friend.username}-status\") if redis_client.get(f\"{friend.username}-status\") else \"offline\"} for friend in friends]\r\n    return friends_json\r\n@router.delete(\"/friend\")\r\nasync def accept_friend_request(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    already_friends = await db.execute(select(models.Friends).filter(or_(and_(models.Friends.sender == current_user.username,\r\n                                                               models.Friends.receiver == friend_request.username),\r\n                                                          and_(models.Friends.receiver == current_user.username,\r\n                                                               models.Friends.sender == friend_request.username))))\r\n    already_friends = already_friends.scalars().first()\r\n    if not already_friends:\r\n        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=\"You are not friends with this user\")\r\n    await db.delete(already_friends)\r\n    await db.commit()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/routers/friends.py b/app/routers/friends.py
+--- a/app/routers/friends.py	(revision 5d601e556dfe5a5abc7e371cb6e5b29937fb8565)
++++ b/app/routers/friends.py	(date 1708188295648)
+@@ -26,7 +26,7 @@
+ async def get_friends(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+     friends = await db.execute(select(models.Users.profile, models.Users.username,models.Dms.id).join(models.Friends, or_(and_(
+         models.Friends.receiver == current_user.username, models.Friends.sender == models.Users.username), and_(
+-        models.Friends.sender == current_user.username, models.Friends.receiver == models.Users.username))).join(models.Dms,or_(and_(models.Dms.sender == current_user.username,models.Dms.receiver == models.Users.username),
++        models.Friends.sender == current_user.username, models.Friends.receiver == models.Users.username))).outerjoin(models.Dms,or_(and_(models.Dms.sender == current_user.username,models.Dms.receiver == models.Users.username),
+                                                                                                             and_(models.Dms.receiver == current_user.username,models.Dms.sender == models.Users.username))))
+     friends = friends.all()
+     friends_json = [{"username":friend.username,"profile":friend.profile,"dmid":friend.id,"status":redis_client.get(f"{friend.username}-status") if redis_client.get(f"{friend.username}-status") else "offline"} for friend in friends]
+Index: app/routers/servers.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from fastapi import APIRouter,Depends,WebSocket,WebSocketDisconnect,HTTPException,status\r\nfrom app.schemas import Server,UserServer\r\nfrom app.database import get_db\r\nfrom app.ServerConnectionManager import server_manager\r\nfrom sqlalchemy.ext.asyncio import AsyncSession\r\nfrom sqlalchemy import and_,select\r\nfrom app import models,oauth\r\nfrom kafka import KafkaProducer\r\nimport redis\r\nimport uuid\r\nimport base64\r\nimport firebase\r\nimport json\r\nfrom datetime import datetime\r\nimport asyncio\r\nimport os\r\nfrom dotenv import load_dotenv\r\n\r\nload_dotenv()\r\nrouter = APIRouter()\r\nredis_client = redis.Redis(host=\"localhost\",port=6379,db=0,decode_responses=True)\r\nproducer = KafkaProducer(bootstrap_servers=\"localhost:29092\")\r\nfirebase_config = {\r\n  \"apiKey\": os.environ.get(\"API_KEY\"),\r\n  \"authDomain\": \"discord-83cd2.firebaseapp.com\",\r\n  \"databaseURL\": \"https://discord-83cd2-default-rtdb.firebaseio.com\",\r\n  \"projectId\": \"discord-83cd2\",\r\n  \"storageBucket\": \"discord-83cd2.appspot.com\",\r\n  \"messagingSenderId\": \"951586420649\",\r\n  \"appId\": \"1:951586420649:web:c95ce57fdd3766492336b8\",\r\n  \"measurementId\": \"G-GLYJ5PKYF7\"\r\n}\r\nfirebase_app = firebase.initialize_app(firebase_config)\r\nfirebase_storage = firebase_app.storage()\r\n\r\n\r\nasync def save_message(data:dict,db:AsyncSession):\r\n    chat = data.get(\"chat\")\r\n    type = data.get(\"type\")\r\n    username = data.get(\"username\")\r\n    if chat == \"dm\":\r\n        dm = data[\"id\"]\r\n        if type == \"text\":\r\n            text = data[\"text\"]\r\n            message = models.Dm_Messages(text=text,username=username,dm=int(dm),created_date=datetime.now())\r\n            db.add(message)\r\n        if type == \"file\":\r\n            file = data[\"file\"]\r\n            file_type = data[\"filetype\"]\r\n            message = models.Dm_Messages(file=file,filetype=file_type,username=username,dm=int(dm),created_date=datetime.now())\r\n            db.add(message)\r\n        if type == \"textandfile\":\r\n            text = data[\"text\"]\r\n            file = data[\"file\"]\r\n            file_type = data[\"filetype\"]\r\n            message = models.Dm_Messages(text=text,file=file, filetype=file_type, username=username, dm=int(dm),created_date=datetime.now())\r\n            db.add(message)\r\n        if type == \"link\":\r\n            link = data[\"link\"]\r\n            server_invite_id = data[\"serverinviteid\"]\r\n            message = models.Dm_Messages(link=link,username=username, dm=int(dm),serverinviteid=int(server_invite_id),created_date=datetime.now())\r\n            db.add(message)\r\n            redis_client.set(link, server_invite_id)\r\n    if chat == \"server\":\r\n        server = data[\"id\"]\r\n        if type == \"text\":\r\n            text = data[\"text\"]\r\n            message = models.Server_Messages(text=text, username=username, server=int(server), created_date=datetime.now())\r\n            db.add(message)\r\n        if type == \"file\":\r\n            file = data[\"file\"]\r\n            file_type = data[\"filetype\"]\r\n            message = models.Server_Messages(file=file,filetype=file_type, username=username, server=int(server), created_date=datetime.now())\r\n            db.add(message)\r\n        if type == \"textandfile\":\r\n            text = data[\"text\"]\r\n            file = data[\"file\"]\r\n            file_type = data[\"filetype\"]\r\n            message = models.Server_Messages(text=text,file=file, filetype=file_type, username=username, server=int(server),created_date=datetime.now())\r\n            db.add(message)\r\n        if type == \"announcement\":\r\n            username = data[\"username\"]\r\n            announcement = data[\"announcement\"]\r\n            message = models.Server_Messages(announcement=announcement,username=username,server=int(server),created_date=datetime.now())\r\n            db.add(message)\r\n    await db.commit()\r\n@router.websocket(\"/ws/server/{token}\")\r\nasync def server(token:str,websocket:WebSocket,current_user:models.Users = Depends(oauth.get_websocket_user),db:AsyncSession = Depends(get_db)):\r\n    await server_manager.connect(websocket,current_user)\r\n    try:\r\n        while True:\r\n            data = await websocket.receive_json()\r\n            if data[\"type\"] == \"file\" or data[\"type\"] == \"textandfile\":\r\n                file_type = data[\"filetype\"]\r\n                filename = f\"{uuid.uuid4()}.{file_type}\"\r\n                encoded_image = base64.b64decode(data[\"file\"].split(\",\")[1])\r\n                await asyncio.to_thread(firebase_storage.child(filename).put,encoded_image)\r\n                data[\"file\"] = f\"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8\"\r\n                await server_manager.broadcast(websocket, data, current_user)\r\n            elif data[\"type\"] == \"link\":\r\n                data[\"link\"] = str(uuid.uuid4())\r\n                await server_manager.broadcast(websocket, data, current_user)\r\n            else:\r\n                await server_manager.broadcast(websocket, data, current_user)\r\n            if data[\"type\"] != \"announcement\" and token != \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\":\r\n                producer.send(\"notifications\",json.dumps(data).encode(\"utf-8\"))\r\n            await save_message(data,db)\r\n    except WebSocketDisconnect:\r\n        server_manager.disconnect(websocket,current_user)\r\n\r\n@router.post(\"/server\")\r\nasync def create_server(server:Server,current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    if server.profile:\r\n        filename = f\"{uuid.uuid4()}.jpg\"\r\n        encoded_image = base64.b64decode(server.profile.split(\",\")[1])\r\n        await asyncio.to_thread(firebase_storage.child(filename).put,encoded_image)\r\n        new_server = models.Server(name=server.name,profile=f\"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8\",owner=current_user.username)\r\n        db.add(new_server)\r\n        await db.commit()\r\n    else:\r\n        new_server = models.Server(name=server.name,owner=current_user.username)\r\n        db.add(new_server)\r\n        await db.commit()\r\n    await db.refresh(new_server)\r\n    new_server_user = models.Server_User(server_id=new_server.id,username=current_user.username)\r\n    db.add(new_server_user)\r\n    await db.commit()\r\n    server_manager.add_valid_server_or_dm([new_server_user.username],\"server_ids\",new_server_user.server_id)\r\n@router.get(\"/servers\")\r\nasync def get_servers(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    servers = await db.execute(select(models.Server_User.server_id,models.Server.owner,models.Server.profile,models.Server.id,models.Server.name)\\\r\n             .join(models.Server,models.Server.id == models.Server_User.server_id).filter(models.Server_User.username == current_user.username))\r\n    servers = servers.all()\r\n    servers_json = [{\"id\":server.id,\"owner\":server.owner,\"profile\":server.profile,\"name\":server.name} for server in servers]\r\n    return servers_json\r\n@router.get(\"/server/{id}\")\r\nasync def get_server_information(id:int,current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    in_server = await db.execute(select(models.Server_User).filter(and_(models.Server_User.server_id == id,models.Server_User.username == current_user.username)))\r\n    in_server = in_server.scalars().first()\r\n    if not in_server:\r\n        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=\"You are not a part of this server\")\r\n    server = await db.execute(select(models.Server).filter(models.Server.id == id))\r\n    server = server.scalars().first()\r\n    return server\r\n@router.get(\"/server/users/{id}\")\r\nasync def get_server_users(id:int,current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    in_server = await db.execute(select(models.Server_User).filter(and_(models.Server_User.server_id == id, models.Server_User.username == current_user.username)))\r\n    in_server = in_server.scalars().first()\r\n    if not in_server:\r\n        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=\"You are not a part of this server\")\r\n    users = await db.execute(select(models.Server_User.username,models.Users.username,models.Users.profile).join(models.Users,models.Server_User.username == models.Users.username).filter(models.Server_User.server_id == id))\r\n    users = users.all()\r\n    users_json = [{\"username\":user.username,\"profile\":user.profile,\"status\":redis_client.get(f\"{user.username}-status\") if redis_client.get(f\"{user.username}-status\") is not None else \"offline\"} for user in users]\r\n    return users_json\r\n@router.post(\"/server/user\")\r\nasync def join_server(user_server:UserServer,current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    server_id = redis_client.get(user_server.link)\r\n    if server_id is None:\r\n        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail=\"Invite link has expired\")\r\n    already_in_server = await db.execute(select(models.Server_User).filter(and_(models.Server_User.username == current_user.username,models.Server_User.server_id == int(server_id))))\r\n    already_in_server = already_in_server.scalars().first()\r\n    if already_in_server:\r\n        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail=\"You are already a part of this server\")\r\n    server_user = models.Server_User(username=current_user.username,server_id=int(server_id))\r\n    db.add(server_user)\r\n    await db.commit()\r\n    server_user_json = {\"type\":\"announcement\",\"serverid\":server_id,\"username\":current_user.username}\r\n    server_manager.add_valid_server_or_dm(current_user.username,\"server_ids\",server_id)\r\n    producer.send(\"notifications\", json.dumps(server_user_json).encode(\"utf-8\"))\r\n    return {\"serverid\":server_id}\r\n@router.get(\"/servermessages/{server}\")\r\nasync def get_server_messages(server:int, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    in_server = await db.execute(select(models.Server_User).filter(and_(models.Server_User.server_id == server,models.Server_User.username == current_user.username)))\r\n    in_server = in_server.scalars().first()\r\n    if not in_server:\r\n        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=\"You are not a part of this server\")\r\n    server_messages = await db.execute(select(models.Server_Messages.announcement,models.Server_Messages.server,models.Server_Messages.username,\r\n                        models.Server_Messages.text, models.Server_Messages.file,\r\n                        models.Server_Messages.created_date, models.Server_Messages.filetype,\r\n                        models.Users.profile).join(models.Users,models.Server_Messages.username == models.Users.username).filter(\r\n                        models.Server_Messages.server == server).order_by(models.Server_Messages.id))\r\n    server_messages = server_messages.all()\r\n    server_messages_json = [{\"announcement\":message.announcement,\"server\":message.server,\"username\":message.username,\"text\":message.text,\"file\":message.file,\"filetype\":message.filetype,\"date\":message.created_date,\"profile\":message.profile} for message in server_messages]\r\n    return server_messages_json
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/routers/servers.py b/app/routers/servers.py
+--- a/app/routers/servers.py	(revision 5d601e556dfe5a5abc7e371cb6e5b29937fb8565)
++++ b/app/routers/servers.py	(date 1708654480079)
+@@ -1,3 +1,4 @@
++import json
+ from fastapi import APIRouter,Depends,WebSocket,WebSocketDisconnect,HTTPException,status
+ from app.schemas import Server,UserServer
+ from app.database import get_db
+@@ -5,12 +6,10 @@
+ from sqlalchemy.ext.asyncio import AsyncSession
+ from sqlalchemy import and_,select
+ from app import models,oauth
+-from kafka import KafkaProducer
+ import redis
+ import uuid
+ import base64
+ import firebase
+-import json
+ from datetime import datetime
+ import asyncio
+ import os
+@@ -19,7 +18,6 @@
+ load_dotenv()
+ router = APIRouter()
+ redis_client = redis.Redis(host="localhost",port=6379,db=0,decode_responses=True)
+-producer = KafkaProducer(bootstrap_servers="localhost:29092")
+ firebase_config = {
+   "apiKey": os.environ.get("API_KEY"),
+   "authDomain": "discord-83cd2.firebaseapp.com",
+@@ -33,15 +31,32 @@
+ firebase_app = firebase.initialize_app(firebase_config)
+ firebase_storage = firebase_app.storage()
+ 
++async def send_notification(websocket:WebSocket,data:dict,current_user:models.Users,db:AsyncSession):
++    if data["chat"] == "dm":
++        dm = data["dm"]
++        username = data["username"]
++        other_user = data["otheruser"]
++        profile = data["profile"]
++        notification = {"chat": "notification", "type": "message","dm":int(dm),"sender":username,"receiver":other_user,"profile":profile}
++        await server_manager.broadcast(websocket, notification, current_user)
++        already_notification = await db.execute(select(models.Notifications).filter(models.Notifications.dm == int(dm)))
++        already_notification = already_notification.scalars().first()
++        if already_notification:
++            count = already_notification.count + 1
++            already_notification.count = count
++        else:
++            count = 1
++            save_notification = models.Notifications(sender=username,receiver=other_user,dm=int(dm),count=count)
++            db.add(save_notification)
+ 
+ async def save_message(data:dict,db:AsyncSession):
+     chat = data.get("chat")
+     type = data.get("type")
+     username = data.get("username")
+     if chat == "dm":
+-        dm = data["id"]
++        dm = data["dm"]
+         if type == "text":
+-            text = data["text"]
++            text = str(data["text"])
+             message = models.Dm_Messages(text=text,username=username,dm=int(dm),created_date=datetime.now())
+             db.add(message)
+         if type == "file":
+@@ -50,7 +65,7 @@
+             message = models.Dm_Messages(file=file,filetype=file_type,username=username,dm=int(dm),created_date=datetime.now())
+             db.add(message)
+         if type == "textandfile":
+-            text = data["text"]
++            text = str(data["text"])
+             file = data["file"]
+             file_type = data["filetype"]
+             message = models.Dm_Messages(text=text,file=file, filetype=file_type, username=username, dm=int(dm),created_date=datetime.now())
+@@ -62,9 +77,9 @@
+             db.add(message)
+             redis_client.set(link, server_invite_id)
+     if chat == "server":
+-        server = data["id"]
++        server = data["server"]
+         if type == "text":
+-            text = data["text"]
++            text = str(data["text"])
+             message = models.Server_Messages(text=text, username=username, server=int(server), created_date=datetime.now())
+             db.add(message)
+         if type == "file":
+@@ -73,15 +88,10 @@
+             message = models.Server_Messages(file=file,filetype=file_type, username=username, server=int(server), created_date=datetime.now())
+             db.add(message)
+         if type == "textandfile":
+-            text = data["text"]
++            text = str(data["text"])
+             file = data["file"]
+             file_type = data["filetype"]
+             message = models.Server_Messages(text=text,file=file, filetype=file_type, username=username, server=int(server),created_date=datetime.now())
+-            db.add(message)
+-        if type == "announcement":
+-            username = data["username"]
+-            announcement = data["announcement"]
+-            message = models.Server_Messages(announcement=announcement,username=username,server=int(server),created_date=datetime.now())
+             db.add(message)
+     await db.commit()
+ @router.websocket("/ws/server/{token}")
+@@ -96,18 +106,19 @@
+                 encoded_image = base64.b64decode(data["file"].split(",")[1])
+                 await asyncio.to_thread(firebase_storage.child(filename).put,encoded_image)
+                 data["file"] = f"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8"
+-                await server_manager.broadcast(websocket, data, current_user)
+             elif data["type"] == "link":
+                 data["link"] = str(uuid.uuid4())
+-                await server_manager.broadcast(websocket, data, current_user)
+-            else:
+-                await server_manager.broadcast(websocket, data, current_user)
+-            if data["type"] != "announcement" and token != "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c":
+-                producer.send("notifications",json.dumps(data).encode("utf-8"))
++            elif data["type"] == "status":
++                username = data["username"]
++                status = data["status"]
++                redis_client.set(f"{username}-status", status)
++            await server_manager.broadcast(websocket, data, current_user)
+             await save_message(data,db)
++            await send_notification(websocket,data,current_user,db)
+     except WebSocketDisconnect:
+         server_manager.disconnect(websocket,current_user)
+-
++    except Exception as e:
++        print(e)
+ @router.post("/server")
+ async def create_server(server:Server,current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+     if server.profile:
+@@ -116,16 +127,20 @@
+         await asyncio.to_thread(firebase_storage.child(filename).put,encoded_image)
+         new_server = models.Server(name=server.name,profile=f"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8",owner=current_user.username)
+         db.add(new_server)
+-        await db.commit()
+     else:
+         new_server = models.Server(name=server.name,owner=current_user.username)
+         db.add(new_server)
+-        await db.commit()
+-    await db.refresh(new_server)
++    await db.flush()
+     new_server_user = models.Server_User(server_id=new_server.id,username=current_user.username)
+     db.add(new_server_user)
+-    await db.commit()
+     server_manager.add_valid_server_or_dm([new_server_user.username],"server_ids",new_server_user.server_id)
++    notification = {"chat": "server", "server": new_server_user.server_id, "type": "announcement",
++                    "announcement": f"{new_server_user.username} has created the server", "username": new_server_user.username,
++                    "date": datetime.now().isoformat()}
++    for connection in server_manager.active_connections:
++        if connection.get("username") == current_user.username:
++            await server_manager.broadcast(connection.get("websocket"), notification, connection,db)
++    await db.commit()
+ @router.get("/servers")
+ async def get_servers(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+     servers = await db.execute(select(models.Server_User.server_id,models.Server.owner,models.Server.profile,models.Server.id,models.Server.name)\
+@@ -163,10 +178,12 @@
+         raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="You are already a part of this server")
+     server_user = models.Server_User(username=current_user.username,server_id=int(server_id))
+     db.add(server_user)
+-    await db.commit()
+-    server_user_json = {"type":"announcement","serverid":server_id,"username":current_user.username}
++    notification = {"chat":"server","server":server_id,"type":"announcement","announcement":f"{current_user.username} has joined the server","username":current_user.username,"date":datetime.now().isoformat()}
+     server_manager.add_valid_server_or_dm(current_user.username,"server_ids",server_id)
+-    producer.send("notifications", json.dumps(server_user_json).encode("utf-8"))
++    for connection in server_manager.active_connections:
++        if connection.get("username") == current_user.username:
++            await server_manager.broadcast(connection.get("websocket"), notification, connection,db)
++    await db.commit()
+     return {"serverid":server_id}
+ @router.get("/servermessages/{server}")
+ async def get_server_messages(server:int, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+Index: app/.gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>.env\r\n__pycache__
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/.gitignore b/app/.gitignore
+--- a/app/.gitignore	(revision 5d601e556dfe5a5abc7e371cb6e5b29937fb8565)
++++ b/app/.gitignore	(date 1708228824882)
+@@ -1,2 +1,1 @@
+-.env
+-__pycache__
+\ No newline at end of file
++.env
+\ No newline at end of file
+Index: app/routers/user.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from fastapi import APIRouter,Depends,HTTPException,status,UploadFile\r\nfrom app.schemas import User,Login,Status\r\nfrom app.database import get_db\r\nfrom sqlalchemy.ext.asyncio import AsyncSession\r\nfrom sqlalchemy import select\r\nfrom app import models,utils,oauth\r\nfrom kafka import KafkaProducer\r\nimport json\r\nimport uuid\r\nimport firebase\r\nimport asyncio\r\nimport os\r\nfrom dotenv import load_dotenv\r\n\r\nload_dotenv()\r\nrouter = APIRouter()\r\nproducer = KafkaProducer(bootstrap_servers=\"localhost:29092\")\r\nfirebase_config = {\r\n  \"apiKey\": os.environ.get(\"API_KEY\"),\r\n  \"authDomain\": \"discord-83cd2.firebaseapp.com\",\r\n  \"databaseURL\": \"https://discord-83cd2-default-rtdb.firebaseio.com\",\r\n  \"projectId\": \"discord-83cd2\",\r\n  \"storageBucket\": \"discord-83cd2.appspot.com\",\r\n  \"messagingSenderId\": \"951586420649\",\r\n  \"appId\": \"1:951586420649:web:c95ce57fdd3766492336b8\",\r\n  \"measurementId\": \"G-GLYJ5PKYF7\"\r\n}\r\nfirebase_app = firebase.initialize_app(firebase_config)\r\nfirebase_storage = firebase_app.storage()\r\n\r\n@router.post(\"/user\")\r\nasync def create_user(user:User,db:AsyncSession = Depends(get_db)):\r\n    existing_user = await db.execute(select(models.Users).filter(models.Users.username == user.username))\r\n    existing_user = existing_user.scalars().first()\r\n    if existing_user:\r\n        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail=\"User already exists\")\r\n    password = utils.hash(user.password)\r\n    new_user = models.Users(username=user.username, email=user.email, password=password)\r\n    db.add(new_user)\r\n    await db.commit()\r\n\r\n@router.post(\"/login\")\r\nasync def login(login:Login,db:AsyncSession = Depends(get_db)):\r\n    existing_user = await db.execute(select(models.Users).filter(models.Users.username == login.username))\r\n    existing_user = existing_user.scalars().first()\r\n    if not existing_user:\r\n        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail=\"Invalid credentials\")\r\n    verify = utils.verify(login.password, existing_user.password)\r\n    if not verify:\r\n        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=\"Invalid credentials\")\r\n    token = oauth.create_access_token(data={\"username\":existing_user.username})\r\n    return {\"access_token\":token}\r\n\r\n@router.get(\"/usercredentials\")\r\nasync def get_user_credentials(current_user: models.Users = Depends(oauth.get_current_user)):\r\n    return {\"username\":current_user.username,\"profile\":current_user.profile}\r\n\r\n@router.put(\"/status\")\r\nasync def change_status(status:Status, current_user: models.Users = Depends(oauth.get_current_user)):\r\n    status_json = {\"type\":\"status\",\"status\":status.status,\"username\":current_user.username}\r\n    producer.send(\"notifications\", json.dumps(status_json).encode(\"utf-8\"))\r\n\r\n@router.put(\"/profilepicture\")\r\nasync def update_profile_picture(file:UploadFile, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):\r\n    file_type = file.filename.split(\".\")[-1]\r\n    filename = f\"{uuid.uuid4()}.{file_type}\"\r\n    await asyncio.to_thread(firebase_storage.child(filename).put,file.file.read())\r\n    current_user.profile = f\"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8\"\r\n    await db.commit()\r\n    return {\"profile\":f\"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8\"}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/routers/user.py b/app/routers/user.py
+--- a/app/routers/user.py	(revision 5d601e556dfe5a5abc7e371cb6e5b29937fb8565)
++++ b/app/routers/user.py	(date 1708398425148)
+@@ -1,11 +1,9 @@
+ from fastapi import APIRouter,Depends,HTTPException,status,UploadFile
+-from app.schemas import User,Login,Status
++from app.schemas import User,Login
+ from app.database import get_db
+ from sqlalchemy.ext.asyncio import AsyncSession
+ from sqlalchemy import select
+ from app import models,utils,oauth
+-from kafka import KafkaProducer
+-import json
+ import uuid
+ import firebase
+ import asyncio
+@@ -14,7 +12,6 @@
+ 
+ load_dotenv()
+ router = APIRouter()
+-producer = KafkaProducer(bootstrap_servers="localhost:29092")
+ firebase_config = {
+   "apiKey": os.environ.get("API_KEY"),
+   "authDomain": "discord-83cd2.firebaseapp.com",
+@@ -55,11 +52,6 @@
+ async def get_user_credentials(current_user: models.Users = Depends(oauth.get_current_user)):
+     return {"username":current_user.username,"profile":current_user.profile}
+ 
+-@router.put("/status")
+-async def change_status(status:Status, current_user: models.Users = Depends(oauth.get_current_user)):
+-    status_json = {"type":"status","status":status.status,"username":current_user.username}
+-    producer.send("notifications", json.dumps(status_json).encode("utf-8"))
+-
+ @router.put("/profilepicture")
+ async def update_profile_picture(file:UploadFile, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+     file_type = file.filename.split(".")[-1]

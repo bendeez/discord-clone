@@ -23,7 +23,7 @@ export default function InviteUsers({serverName,serverProfile}){
     function inviteUser(dmId,otherUser){
         const date = new Date()
         if(serverWebsocket){
-            serverWebsocket.send(JSON.stringify({"chat":"dm","id":dmId,"type":"link","serverinviteid":id,"username":username,"profile":profile,"otheruser":otherUser,"servername":serverName,"serverprofile":serverProfile,"date":date}))
+            serverWebsocket.send(JSON.stringify({"chat":"dm","dm":dmId,"type":"link","serverinviteid":id,"username":username,"profile":profile,"otheruser":otherUser,"servername":serverName,"serverprofile":serverProfile,"date":date}))
             changeShowInviteUsers()
             navigate("/dm/" + dmId)
         }

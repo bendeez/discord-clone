@@ -5,13 +5,10 @@ from app.ServerConnectionManager import server_manager
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import or_,and_,select
 from app import models,oauth
-from kafka import KafkaProducer
 import redis
-import json
 
 router = APIRouter()
 redis_client = redis.Redis(host="localhost",port=6379,db=0,decode_responses=True)
-producer = KafkaProducer(bootstrap_servers="localhost:29092")
 
 @router.post("/dm")
 async def create_dm(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
@@ -24,11 +21,13 @@ async def create_dm(friend_request:FriendRequest, current_user: models.Users = D
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Already a dm")
     dm = models.Dms(sender=current_user.username, receiver=friend_request.username)
     db.add(dm)
-    await db.commit()
-    await db.refresh(dm)
+    await db.flush()
     server_manager.add_valid_server_or_dm([dm.sender,dm.receiver], "dm_ids", dm.id)
-    dm_json = {"type":"newdm","otheruser":friend_request.username,"username":current_user.username}
-    producer.send("notifications",json.dumps(dm_json).encode("utf-8"))
+    notification = {"chat": "notification", "type": "newdm", "sender": dm.sender, "receiver":dm.receiver}
+    for connection in server_manager.active_connections:
+        if connection.get("username") == current_user.username:
+            await server_manager.broadcast(connection.get("websocket"),notification,connection)
+    await db.commit()
 
 @router.get("/dms")
 async def get_dms(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):

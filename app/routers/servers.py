@@ -5,12 +5,10 @@ from app.ServerConnectionManager import server_manager
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_,select
 from app import models,oauth
-from kafka import KafkaProducer
 import redis
 import uuid
 import base64
 import firebase
-import json
 from datetime import datetime
 import asyncio
 import os
@@ -19,7 +17,6 @@ from dotenv import load_dotenv
 load_dotenv()
 router = APIRouter()
 redis_client = redis.Redis(host="localhost",port=6379,db=0,decode_responses=True)
-producer = KafkaProducer(bootstrap_servers="localhost:29092")
 firebase_config = {
   "apiKey": os.environ.get("API_KEY"),
   "authDomain": "discord-83cd2.firebaseapp.com",
@@ -34,80 +31,35 @@ firebase_app = firebase.initialize_app(firebase_config)
 firebase_storage = firebase_app.storage()
 
 
-async def save_message(data:dict,db:AsyncSession):
-    chat = data.get("chat")
-    type = data.get("type")
-    username = data.get("username")
-    if chat == "dm":
-        dm = data["id"]
-        if type == "text":
-            text = data["text"]
-            message = models.Dm_Messages(text=text,username=username,dm=int(dm),created_date=datetime.now())
-            db.add(message)
-        if type == "file":
-            file = data["file"]
-            file_type = data["filetype"]
-            message = models.Dm_Messages(file=file,filetype=file_type,username=username,dm=int(dm),created_date=datetime.now())
-            db.add(message)
-        if type == "textandfile":
-            text = data["text"]
-            file = data["file"]
-            file_type = data["filetype"]
-            message = models.Dm_Messages(text=text,file=file, filetype=file_type, username=username, dm=int(dm),created_date=datetime.now())
-            db.add(message)
-        if type == "link":
-            link = data["link"]
-            server_invite_id = data["serverinviteid"]
-            message = models.Dm_Messages(link=link,username=username, dm=int(dm),serverinviteid=int(server_invite_id),created_date=datetime.now())
-            db.add(message)
-            redis_client.set(link, server_invite_id)
-    if chat == "server":
-        server = data["id"]
-        if type == "text":
-            text = data["text"]
-            message = models.Server_Messages(text=text, username=username, server=int(server), created_date=datetime.now())
-            db.add(message)
-        if type == "file":
-            file = data["file"]
-            file_type = data["filetype"]
-            message = models.Server_Messages(file=file,filetype=file_type, username=username, server=int(server), created_date=datetime.now())
-            db.add(message)
-        if type == "textandfile":
-            text = data["text"]
-            file = data["file"]
-            file_type = data["filetype"]
-            message = models.Server_Messages(text=text,file=file, filetype=file_type, username=username, server=int(server),created_date=datetime.now())
-            db.add(message)
-        if type == "announcement":
-            username = data["username"]
-            announcement = data["announcement"]
-            message = models.Server_Messages(announcement=announcement,username=username,server=int(server),created_date=datetime.now())
-            db.add(message)
-    await db.commit()
 @router.websocket("/ws/server/{token}")
-async def server(token:str,websocket:WebSocket,current_user:models.Users = Depends(oauth.get_websocket_user),db:AsyncSession = Depends(get_db)):
+async def server(token:str,websocket:WebSocket,current_user:dict = Depends(oauth.get_websocket_user),db:AsyncSession = Depends(get_db)):
     await server_manager.connect(websocket,current_user)
     try:
         while True:
             data = await websocket.receive_json()
+            if data["chat"] == "dm":
+                data["dm"] = int(data["dm"])
+                data["text"] = str(data["text"])
+            if data["chat"] == "server":
+                data["server"] = int(data["server"])
+                data["text"] = str(data["text"])
             if data["type"] == "file" or data["type"] == "textandfile":
                 file_type = data["filetype"]
                 filename = f"{uuid.uuid4()}.{file_type}"
                 encoded_image = base64.b64decode(data["file"].split(",")[1])
                 await asyncio.to_thread(firebase_storage.child(filename).put,encoded_image)
                 data["file"] = f"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8"
-                await server_manager.broadcast(websocket, data, current_user)
             elif data["type"] == "link":
                 data["link"] = str(uuid.uuid4())
-                await server_manager.broadcast(websocket, data, current_user)
-            else:
-                await server_manager.broadcast(websocket, data, current_user)
-            if data["type"] != "announcement" and token != "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c":
-                producer.send("notifications",json.dumps(data).encode("utf-8"))
-            await save_message(data,db)
+            elif data["type"] == "status":
+                username = data["username"]
+                status = data["status"]
+                redis_client.set(f"{username}-status", status)
+            await server_manager.broadcast(websocket, data, current_user,db)
     except WebSocketDisconnect:
         server_manager.disconnect(websocket,current_user)
-
+    except Exception as e:
+        print(e)
 @router.post("/server")
 async def create_server(server:Server,current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
     if server.profile:
@@ -116,16 +68,20 @@ async def create_server(server:Server,current_user: models.Users = Depends(oauth
         await asyncio.to_thread(firebase_storage.child(filename).put,encoded_image)
         new_server = models.Server(name=server.name,profile=f"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8",owner=current_user.username)
         db.add(new_server)
-        await db.commit()
     else:
         new_server = models.Server(name=server.name,owner=current_user.username)
         db.add(new_server)
-        await db.commit()
-    await db.refresh(new_server)
+    await db.flush()
     new_server_user = models.Server_User(server_id=new_server.id,username=current_user.username)
     db.add(new_server_user)
-    await db.commit()
     server_manager.add_valid_server_or_dm([new_server_user.username],"server_ids",new_server_user.server_id)
+    notification = {"chat": "server", "server": new_server_user.server_id, "type": "announcement",
+                    "announcement": f"{new_server_user.username} has created the server", "username": new_server_user.username,
+                    "date": datetime.now().isoformat()}
+    for connection in server_manager.active_connections:
+        if connection.get("username") == current_user.username:
+            await server_manager.broadcast(connection.get("websocket"), notification, connection,db)
+    await db.commit()
 @router.get("/servers")
 async def get_servers(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
     servers = await db.execute(select(models.Server_User.server_id,models.Server.owner,models.Server.profile,models.Server.id,models.Server.name)\
@@ -163,10 +119,12 @@ async def join_server(user_server:UserServer,current_user: models.Users = Depend
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="You are already a part of this server")
     server_user = models.Server_User(username=current_user.username,server_id=int(server_id))
     db.add(server_user)
-    await db.commit()
-    server_user_json = {"type":"announcement","serverid":server_id,"username":current_user.username}
+    notification = {"chat":"server","server":server_id,"type":"announcement","announcement":f"{current_user.username} has joined the server","username":current_user.username,"date":datetime.now().isoformat()}
     server_manager.add_valid_server_or_dm(current_user.username,"server_ids",server_id)
-    producer.send("notifications", json.dumps(server_user_json).encode("utf-8"))
+    for connection in server_manager.active_connections:
+        if connection.get("username") == current_user.username:
+            await server_manager.broadcast(connection.get("websocket"), notification, connection,db)
+    await db.commit()
     return {"serverid":server_id}
 @router.get("/servermessages/{server}")
 async def get_server_messages(server:int, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):

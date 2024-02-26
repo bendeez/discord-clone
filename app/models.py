@@ -1,7 +1,7 @@
 from app.database import Base
 from sqlalchemy.orm import Mapped,mapped_column
 from datetime import datetime
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey,Column,Integer
 
 
 class Users(Base):
@@ -18,16 +18,16 @@ class Users(Base):
 #     password = Column(String,nullable=False)
 #     profile = Column(String,default="https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/default.png?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8")
 
-class FriendRequests(Base):
-    __tablename__ = "friend-requests"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    sender: Mapped[str] = mapped_column(ForeignKey("users.username",ondelete="CASCADE"))
-    receiver: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
 # class FriendRequests(Base):
 #     __tablename__ = "friend-requests"
-#     id = Column(Integer,primary_key=True)
-#     sender = Column(ForeignKey("users.username",ondelete="CASCADE"))
-#     receiver = Column(ForeignKey("users.username",ondelete="CASCADE"))
+#     id: Mapped[int] = mapped_column(primary_key=True)
+#     sender: Mapped[str] = mapped_column(ForeignKey("users.username",ondelete="CASCADE"))
+#     receiver: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
+class FriendRequests(Base):
+    __tablename__ = "friend-requests"
+    id = Column(Integer,primary_key=True)
+    sender = Column(ForeignKey("users.username",ondelete="CASCADE"))
+    receiver = Column(ForeignKey("users.username",ondelete="CASCADE"))
 
 class Friends(Base):
     __tablename__ = "friends"
@@ -54,13 +54,13 @@ class Dms(Base):
 class Dm_Messages(Base):
     __tablename__ = "dm_messages"
     id: Mapped[int] = mapped_column(primary_key=True)
-    link: Mapped[str] = mapped_column()
-    text: Mapped[str] = mapped_column()
-    file: Mapped[str] = mapped_column()
-    filetype: Mapped[str] = mapped_column()
+    link: Mapped[str] = mapped_column(nullable=True)
+    text: Mapped[str] = mapped_column(nullable=True)
+    file: Mapped[str] = mapped_column(nullable=True)
+    filetype: Mapped[str] = mapped_column(nullable=True)
     username: Mapped[str] = mapped_column(ForeignKey("users.username",ondelete="CASCADE"))
     dm: Mapped[int] = mapped_column(ForeignKey("dms.id",ondelete="CASCADE"))
-    serverinviteid: Mapped[int] = mapped_column(ForeignKey("server.id"))
+    serverinviteid: Mapped[int] = mapped_column(ForeignKey("server.id"),nullable=True)
     created_date: Mapped[datetime] = mapped_column(nullable=False)
 
 # class Dm_Messages(Base):
