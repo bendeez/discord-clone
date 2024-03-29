@@ -1,0 +1,88 @@
+.dms{
+    background-color:#2e3136;
+}
+.direct-messages{
+    color:white;
+    font-weight:bold;
+    font-size:.7rem;
+    margin-left:1rem;
+    margin-top:1rem;
+    text-align:left
+}
+.dms-nav{
+    display:flex;
+    flex-direction:column;
+    margin-top:1rem;
+    border-top:1px solid rgba(128, 128, 128, 0.2)
+}
+.dms-nav p{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    color:white;
+    padding:.5rem;
+    cursor:pointer
+}
+.dms-nav p:hover{
+    background-color:rgba(128, 128, 128, 0.2)
+}
+.dm-users{
+    min-height:36rem;
+    max-height:36rem;
+    overflow:scroll
+}
+.dm-user{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    padding:.5rem;
+    cursor:pointer
+}
+.dm-user:hover{
+   background-color:rgba(128, 128, 128, 0.2)
+}
+.dm-user p{
+    color:white
+}
+.dm-user img{
+    width:3rem;
+    border-radius:50%;
+    height:3rem
+}
+.dm-profile{
+    position:relative
+}
+.online{
+    position:absolute;
+    bottom:0%;
+    right:0%;
+    height:1rem;
+    width:1rem;
+    background-color:green;
+    border-radius:50%;
+    border:.2rem solid #2e3136
+}
+.offline{
+    position:absolute;
+    bottom:0%;
+    right:0%;
+    height:1rem;
+    width:1rem;
+    background-color:gray;
+    border-radius:50%;
+    border:.2rem solid #2e3136
+}
+.find-a-conversation-container{
+    display:flex;
+    justify-content:center
+}
+.find-a-conversation{
+    width:13rem;
+    height:1.5rem;
+    margin-top:1rem;
+    background-color:#23272A;
+    border-radius:5%;
+    padding:.3rem;
+    cursor:pointer;
+    color:#cccccc
+}

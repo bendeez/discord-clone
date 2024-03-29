@@ -1,0 +1,27 @@
+.server-chat{
+    background-color:#36393f;
+    border-right:1px solid rgba(128, 128, 128, 0.2)
+}
+.server-chat-header{
+    border-bottom:.1rem solid rgba(0, 0, 0, 0.3);
+    padding:.5rem
+}
+.server-chat-header p{
+    text-align:left;
+    color:white;
+    font-weight:bold
+}
+.dm-conversation-beginning span{
+    color:gray;
+    margin-left:.5rem
+}
+.join-announcement{
+    display:flex;
+    align-items:center;
+    margin:1rem
+
+}
+.join-announcement p{
+    text-align:left;
+    color:lightgray
+}

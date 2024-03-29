@@ -1,0 +1,33 @@
+.user-requests-nav{
+    display:flex;
+    gap:2rem;
+    margin:1rem
+}
+.user-requests-nav p{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    color:white;
+    font-weight:bold
+}
+.user-requests-nav p:not(:first-child){
+    cursor:pointer;
+    padding:.2rem
+}
+.user-requests-nav p:not(:first-child,:last-child):hover{
+    background-color:rgba(128, 128, 128, 0.2);
+    border-radius:10%
+}
+.add-friend{
+    padding:.2rem;
+    background-color:green;
+    border-radius:10%
+}
+.add-friend-selected{
+    padding:.2rem;
+    border-radius:10%;
+    color:green !important
+}
+.request-selected{
+    background-color:rgba(128, 128, 128, 0.2)
+}

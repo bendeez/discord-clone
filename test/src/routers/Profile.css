@@ -1,0 +1,33 @@
+.profile-container{
+    position:absolute;
+    bottom:130%;
+    background-color:#23272A;
+    padding:1rem;
+    border-radius:1rem;
+    box-shadow:0 0 .2rem black
+}
+.profile-container p{
+    margin-top:1rem;
+    text-align:left
+}
+.profile-container-top{
+    display:flex;
+    align-items:center;
+    gap:5rem
+}
+.change-profile input{
+    display:none
+}
+.change-profile label{
+    color:white;
+    font-size:2rem;
+    cursor:pointer
+}
+.change-profile label:hover{
+    color:#36393f
+}
+.profile-container img{
+    width:5rem;
+    height:5rem;
+    cursor:pointer
+}

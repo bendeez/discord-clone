@@ -1,0 +1,76 @@
+.invite-users-container{
+    position:absolute;
+    left:41%;
+    top:30%;
+    background-color:#2e3136;
+    padding:1rem
+}
+.invite-users-container p{
+    text-align:left;
+    color:white;
+    font-weight:bold
+}
+.invite-users-container input{
+    height:1rem;
+    width:19rem;
+    border:none;
+    border-radius:.25rem;
+    background-color:#23272A;
+    padding:.3rem;
+    color:white;
+    margin-top:1rem
+}
+.invite-users-container input:focus{
+    outline:none
+}
+.invite-users-container button{
+    width:5rem;
+    background-color:transparent;
+    color:white;
+    font-weight:bold;
+    border:.1rem solid green;
+    height:1.5rem;
+    margin-left:.5rem;
+    border-radius:.2rem;
+    cursor:pointer;
+}
+.invite-users-container button:hover{
+    background-color:green;
+}
+.invite-users-container-top{
+    display:flex;
+    justify-content:space-between
+}
+.invite-users{
+    margin-top:1rem
+}
+.dm-profile img{
+    width:3rem;
+    height:3rem;
+    border-radius:50%
+}
+.invite-user{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:.2rem;
+    border-radius:.2rem;
+    padding:.1rem
+}
+.invite-user:hover{
+    background-color:rgba(128, 128, 128, 0.2)
+}
+.invite-profile{
+    display:flex;
+    align-items:center
+}
+.exit{
+    cursor:pointer
+}
+.show-invite-list{
+    color: #87CEFA;
+    cursor:pointer
+}
+.show-invite-list:hover{
+    color:white
+}

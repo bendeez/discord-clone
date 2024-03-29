@@ -1,0 +1,71 @@
+*{
+    margin:0;
+    font-family: 'Roboto', sans-serif
+}
+.error{
+    color:red !important;
+    font-style:italic;
+    font-size:.7rem
+}
+.register-background{
+    height:100vh;
+    width:100%
+}
+.register-container{
+    position:absolute;
+    top:15%;
+    right:35%;
+    width:35rem;
+    height:40rem;
+    border-radius:2.5%;
+    background-color:#36393f;
+    box-shadow:0 0 .7rem rgba(0, 0, 0, 0.5)
+}
+.register h2,p{
+    text-align:center;
+    margin:.5rem
+}
+.register h2{
+    font-weight:bold;
+    color:white
+}
+.register p{
+    color:#cccccc
+}
+.register-form{
+    display:flex;
+    flex-direction:column;
+    padding:1rem
+}
+.register-form input{
+    height:2rem;
+    width:30rem;
+    border-radius:2.5%;
+    border:none;
+    background-color:#23272A;
+    color:white;
+    padding-left:.5rem
+}
+.register-form input:focus{
+    outline:none
+}
+.register-form label{
+    font-size:.7rem;
+    margin-bottom:.5rem;
+    margin-top:1rem;
+    color:white;
+}
+.register-form button{
+    background-color: #87CEFA;
+    height:2.5rem;
+    width:30rem;
+    color:white;
+    font-weight:bold;
+    border:none;
+    cursor:pointer;
+    border-radius:2.5%;
+    margin-top:1rem
+}
+.register-form button:hover{
+    filter: brightness(.7)
+}

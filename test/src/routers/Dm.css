@@ -1,0 +1,193 @@
+.dm{
+    background-color:#36393f;
+    border-right:1px solid rgba(128, 128, 128, 0.2)
+}
+.dm-header-container{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:.7rem;
+    border-bottom:.1rem solid rgba(0, 0, 0, 0.3)
+}
+.dm-header{
+    display:flex;
+    align-items:center;
+}
+.dm-header p{
+    font-weight:bold;
+    color:white
+}
+.dm-header img{
+    width:2rem;
+    height:2rem;
+    border-radius:3rem
+}
+.dm-conversation{
+    max-height:52rem;
+    overflow:scroll
+}
+.dm-conversation-beginning img{
+    width:5rem;
+    height:5rem;
+    border-radius:50%
+}
+.dm-conversation-beginning{
+    margin:.5rem;
+    padding:.5rem;
+    display:flex;
+    flex-direction:column;
+    gap:1rem;
+    border-bottom:.1rem solid rgba(128, 128, 128, 0.3)
+}
+.dm-conversation-beginning p{
+    color:white;
+    font-weight:bold;
+    font-size:2rem;
+    text-align:left
+}
+.dm-conversation-beginning span{
+    color:white
+}
+.dm-conversation-beginning-username{
+    font-weight:bold;
+    margin:0 !important
+}
+.dm-conversation-body{
+    height:39rem
+}
+.invite-link{
+    color:#87CEFA !important;
+    cursor:pointer
+}
+.server-invite-container{
+    background-color:#23272A;
+    border-radius:.2rem;
+    padding:1rem;
+    box-shadow:0 0 .1rem rgba(0, 0, 0, 0.5)
+}
+.server-invite-container span{
+    font-size:.6rem;
+    color:white;
+    font-weight:bold;
+}
+.server-invite{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    margin-top:.5rem
+}
+.server-invite img{
+    height:3rem;
+    width:3rem;
+    border-radius:50%
+}
+.server-invite p{
+    font-weight:bold
+}
+.invite-link:hover{
+    text-decoration:underline
+}
+.send-message{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    margin-left:6rem;
+    margin-top:1rem
+}
+.file-label{
+    cursor:pointer
+}
+.file-label:hover{
+    color:white
+}
+.file-input{
+    display:none
+}
+.file-preview{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    background-color:#2e3136;
+    padding:1rem;
+    height:12rem
+}
+.file-preview-file{
+    max-width:12rem;
+    max-height:12rem;
+    border-radius:.5rem;
+    margin-left:2rem
+}
+.remove-file{
+    cursor:pointer
+}
+.remove-file:hover{
+    filter: brightness(.9)
+}
+.message-input{
+    width:65rem;
+    height:2rem;
+    border:none;
+    border-radius:.25rem;
+    background-color:#2e3136;
+    padding:.3rem;
+    color:white
+}
+.send-message input:focus{
+    outline:none
+}
+.dm-message{
+    display:flex;
+    gap:1rem;
+    margin:1rem;
+    padding:.2rem;
+}
+.dm-message p{
+    max-width:70rem;
+    word-wrap:break-word
+}
+.dm-message-date{
+    font-size:.8rem;
+    color:gray !important;
+    font-weight:bold
+}
+.dm-message:hover{
+    background-color:rgba(128, 128, 128, 0.1)
+}
+.dm-message-profile-image{
+    width:3rem;
+    height:3rem;
+    border-radius:50%
+}
+.dm-message-body-top{
+    display:flex;
+    align-items:center;
+    gap:1rem
+}
+.dm-message-body-top p{
+    margin-top:.5rem !important
+}
+.dm-message-body-top span{
+    color:white !important;
+    font-weight:bold !important;
+    cursor:pointer
+}
+.dm-message-body-top span:hover{
+    text-decoration:underline
+}
+.dm-message-body p{
+    color:white;
+    margin:0;
+    text-align:left
+}
+.dm-message-image{
+    max-width:25rem;
+    max-height:25rem;
+    border-radius:.5rem;
+    cursor:pointer
+}
+.dm-message-video{
+    max-width:25rem;
+    max-height:25rem;
+    border-radius:.5rem;
+    cursor:pointer
+}

@@ -1,0 +1,87 @@
+.requests{
+    background-color:#36393f;
+    border-right:1px solid rgba(128, 128, 128, 0.2)
+}
+.request{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    margin-top:1rem;
+    cursor:pointer;
+    padding:.2rem
+}
+.request p,span{
+    text-align:left
+}
+.request:hover{
+    background-color:rgba(128, 128, 128, 0.2)
+}
+.pending-requests{
+    max-height:47rem;
+    overflow:scroll
+}
+.pending-requests img{
+    width:3rem;
+    height:3rem;
+    border-radius:50%
+}
+.pending-requests p{
+    color:white;
+    font-weight:bold
+}
+.pending-requests span{
+    color:gray;
+    font-size:.7rem
+}
+.request-icons{
+    margin-left:auto
+}
+.count{
+    margin-top:1rem;
+    font-size:.7rem;
+    color:white;
+    font-weight:bold;
+    text-align:left
+}
+.dm-profile{
+    position:relative
+}
+.user-requests-container{
+    margin:2rem
+}
+.user-requests-container input{
+    width:72.5rem;
+    height:2rem;
+    border:none;
+    background-color:#23272A;
+    color:white;
+    padding-left:.5rem
+}
+.user-requests-container input:focus{
+    outline:none
+}
+.error{
+    color:red;
+    font-style:italic;
+    font-size:.7rem;
+    text-align:left
+}
+.success{
+    color:green;
+    font-style:italic;
+    font-size:.7rem;
+    text-align:left
+}
+.cancel:hover{
+    color:red
+}
+.check:hover{
+    color:green
+}
+.decline:hover{
+    color:red
+}
+.remove:hover{
+    color:red
+}
+
