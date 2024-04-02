@@ -1,5 +1,5 @@
 from fastapi import APIRouter,Depends,HTTPException,status,UploadFile
-from schemas import User,Login
+from schemas import UserCreate,UserIn,UserOut
 from database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -7,13 +7,12 @@ import models,utils,oauth
 import uuid
 import firebase
 import asyncio
-import os
-from dotenv import load_dotenv
+from config import settings
 
-load_dotenv()
+
 router = APIRouter()
 firebase_config = {
-  "apiKey": os.environ.get("API_KEY"),
+  "apiKey": settings.API_KEY,
   "authDomain": "discord-83cd2.firebaseapp.com",
   "databaseURL": "https://discord-83cd2-default-rtdb.firebaseio.com",
   "projectId": "discord-83cd2",
@@ -26,7 +25,7 @@ firebase_app = firebase.initialize_app(firebase_config)
 firebase_storage = firebase_app.storage()
 
 @router.post("/user")
-async def create_user(user:User,db:AsyncSession = Depends(get_db)):
+async def create_user(user:UserCreate,db:AsyncSession = Depends(get_db)):
     existing_user = await db.execute(select(models.Users).filter(models.Users.username == user.username))
     existing_user = existing_user.scalars().first()
     if existing_user:
@@ -37,20 +36,20 @@ async def create_user(user:User,db:AsyncSession = Depends(get_db)):
     await db.commit()
 
 @router.post("/login")
-async def login(login:Login,db:AsyncSession = Depends(get_db)):
-    existing_user = await db.execute(select(models.Users).filter(models.Users.username == login.username))
+async def login(user:UserIn,db:AsyncSession = Depends(get_db)):
+    existing_user = await db.execute(select(models.Users).filter(models.Users.username == user.username))
     existing_user = existing_user.scalars().first()
     if not existing_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid credentials")
-    verify = utils.verify(login.password, existing_user.password)
+    verify = utils.verify(user.password, existing_user.password)
     if not verify:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     token = oauth.create_access_token(data={"username":existing_user.username})
     return {"access_token":token}
 
-@router.get("/usercredentials")
+@router.get("/usercredentials",response_model=UserOut)
 async def get_user_credentials(current_user: models.Users = Depends(oauth.get_current_user)):
-    return {"username":current_user.username,"profile":current_user.profile}
+    return current_user
 
 @router.put("/profilepicture")
 async def update_profile_picture(file:UploadFile, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):

@@ -1,19 +1,20 @@
-from database import Base
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped,mapped_column
 from datetime import datetime
 from sqlalchemy import ForeignKey,Column,Integer
 from typing import Optional
 
+class Base(DeclarativeBase):
+    pass
 
 class Users(Base):
     __tablename__ = "users"
     username: Mapped[str] = mapped_column(primary_key=True)
-    email: Mapped[str] = mapped_column(nullable=False)
-    password: Mapped[str] = mapped_column(nullable=False)
+    email: Mapped[str] = mapped_column()
+    password: Mapped[str] = mapped_column()
     profile: Mapped[str] = mapped_column(default="https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/default.png?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8")
-    status: Mapped[str] = mapped_column(default="offline")
     def __repr__(self):
-        return f"Users(username={self.username},email={self.email},profile={self.profile},status={self.status})"
+        return f"Users(username={self.username},email={self.email},profile={self.profile})"
 class FriendRequests(Base):
     __tablename__ = "friend-requests"
     id = Column(Integer,primary_key=True)

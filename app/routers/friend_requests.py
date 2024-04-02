@@ -1,17 +1,18 @@
 from fastapi import APIRouter,Depends,HTTPException,status
-from schemas import FriendRequest
+from schemas import FriendRequestIn,FriendRequestOut
 from database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 from sqlalchemy import or_,and_,select
 import models,oauth
 import redis
+from typing import List
 
 router = APIRouter()
 redis_client = redis.Redis(host="redis",port=6379,db=0,decode_responses=True)
 
 @router.post("/friendrequest")
-async def send_friend_request(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+async def send_friend_request(friend_request:FriendRequestIn, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
     if friend_request.username == current_user.username:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Cannot send friend request to yourself")
     user_exists = await db.execute(select(models.Users).filter(models.Users.username == friend_request.username))
@@ -37,18 +38,17 @@ async def send_friend_request(friend_request:FriendRequest, current_user: models
     db.add(request)
     await db.commit()
 
-@router.get("/friendrequests")
+@router.get("/friendrequests",response_model=List[FriendRequestOut])
 async def get_friend_requests(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
     receiver_user = aliased(models.Users,name="receiver_user")
     sender_user = aliased(models.Users, name="sender_user")
-    friend_requests = await db.execute(select(models.FriendRequests.receiver,models.FriendRequests.sender,receiver_user.profile.label("receiver_profile"),sender_user.profile.label("sender_profile"))\
+    friend_requests = await db.execute(select(models.FriendRequests.receiver,models.FriendRequests.sender,receiver_user.profile.label("receiverprofile"),sender_user.profile.label("senderprofile"))\
                                 .join(receiver_user,receiver_user.username == models.FriendRequests.receiver).join(sender_user,sender_user.username == models.FriendRequests.sender).filter(
                                 or_(models.FriendRequests.receiver == current_user.username,models.FriendRequests.sender == current_user.username)))
     friend_requests = friend_requests.all()
-    friend_requests_json = [{"sender":friend_request.sender,"receiver":friend_request.receiver,"receiverprofile":friend_request.receiver_profile,"senderprofile":friend_request.sender_profile} for friend_request in friend_requests]
-    return friend_requests_json
+    return friend_requests
 @router.delete("/friendrequest")
-async def delete_friend_request(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+async def delete_friend_request(friend_request:FriendRequestIn, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
     already_friend_request = await db.execute(select(models.FriendRequests).filter(or_(and_(models.FriendRequests.sender == current_user.username, models.FriendRequests.receiver == friend_request.username),
                                                                         and_(models.FriendRequests.receiver == current_user.username,models.FriendRequests.sender == friend_request.username))))
     already_friend_request = already_friend_request.scalars().first()

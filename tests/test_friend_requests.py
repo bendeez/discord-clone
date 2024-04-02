@@ -1,5 +1,4 @@
 import asyncio
-
 import aiohttp
 import time
 import requests
@@ -7,7 +6,7 @@ from test_authentication import get_authorization_header
 import uuid
 import pytest
 
-SERVER = "/api"
+SERVER = "http://app:8000"
 
 # def sync_requests(blaziken_headers):
 #     for i in range(100):

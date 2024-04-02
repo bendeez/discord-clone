@@ -1,7 +1,7 @@
 import requests
 from test_authentication import get_authorization_header
 
-SERVER = "/api"
+SERVER = "http://app:8000"
 
 
 def test_get_dms():

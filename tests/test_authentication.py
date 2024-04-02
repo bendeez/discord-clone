@@ -1,6 +1,6 @@
 import requests
 
-SERVER = "/api"
+SERVER = "http://app:8000"
 
 def get_authorization_header(username,password):
     payload = {"username":username,"password":password}

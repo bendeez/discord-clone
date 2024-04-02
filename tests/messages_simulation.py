@@ -5,7 +5,8 @@ from test_authentication import get_authorization_header
 from datetime import datetime
 import requests
 
-SERVER = "/api"
+
+SERVER = "http://app:8000"
 
 def get_user_information(username:str,password:str) -> dict:
     headers = get_authorization_header(username, password)

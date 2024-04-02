@@ -5,8 +5,11 @@ import json
 import requests
 from datetime import datetime
 import asyncio
+from database_connection import SessionLocal
+from test_models import Users
+from sqlalchemy import and_
 
-SERVER = "/api"
+SERVER = "http://app:8000"
 
 
 
@@ -26,11 +29,11 @@ async def connect_first_user(blaziken_data:dict):
     username = blaziken_data["username"]
     profile = blaziken_data["profile"]
     await asyncio.sleep(.5)
-    async with websockets.connect(f"ws://127.0.0.1:8000/ws/server/{token}") as ws:
+    async with websockets.connect(f"ws://app:8000/ws/server/{token}") as ws:
         await ws.send(json.dumps({"chat":"dm","dm":1,"type":"text","text":"hi","username":username,"otheruser":"nolife","profile":profile,"date":datetime.now().isoformat()}))
 async def connect_second_user(nolife_data:dict):
     token = nolife_data["token"]
-    async with websockets.connect(f"ws://127.0.0.1:8000/ws/server/{token}") as ws:
+    async with websockets.connect(f"ws://app:8000/ws/server/{token}") as ws:
         dm_message = json.loads(await asyncio.wait_for(ws.recv(),5))
         print(dm_message)
         assert dm_message["chat"] == "dm"
@@ -39,12 +42,15 @@ async def connect_second_user(nolife_data:dict):
         assert notification["chat"] == "notification"
 @pytest.mark.asyncio
 async def test_websocket_messages():
-    blaziken_data = get_user_information("Blaziken","1234")
-    nolife_data = get_user_information("nolife","1234")
-    tasks = []
-    tasks.append(asyncio.create_task(connect_first_user(blaziken_data)))
-    tasks.append(asyncio.create_task(connect_second_user(nolife_data)))
-    await asyncio.gather(*tasks)
+    with SessionLocal() as db:
+        users = db.query(Users).filter(Users.username.in_(["Blaziken","nolife"])).all()
+        print(users)
+        blaziken_data = get_user_information("Blaziken","1234")
+        nolife_data = get_user_information("nolife","1234")
+        tasks = []
+        tasks.append(asyncio.create_task(connect_first_user(blaziken_data)))
+        tasks.append(asyncio.create_task(connect_second_user(nolife_data)))
+        await asyncio.gather(*tasks)
 
 
 

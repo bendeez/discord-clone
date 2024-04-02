@@ -1,17 +1,18 @@
 from fastapi import APIRouter,Depends,HTTPException,status
-from schemas import FriendRequest
+from schemas import FriendRequestIn,DmsOut,DmMessagesOut
 from database import get_db
 from ServerConnectionManager import server_manager
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import or_,and_,select
 import models,oauth
 import redis
+from typing import List
 
 router = APIRouter()
 redis_client = redis.Redis(host="redis",port=6379,db=0,decode_responses=True)
 
 @router.post("/dm")
-async def create_dm(friend_request:FriendRequest, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
+async def create_dm(friend_request:FriendRequestIn, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
     already_dm = await db.execute(select(models.Dms).filter(or_(and_(models.Dms.sender == current_user.username,
                                                       models.Dms.receiver == friend_request.username),
                                                       and_(models.Dms.receiver == current_user.username,
@@ -29,34 +30,29 @@ async def create_dm(friend_request:FriendRequest, current_user: models.Users = D
             await server_manager.broadcast(connection.get("websocket"),notification,connection,db)
     await db.commit()
 
-@router.get("/dms")
+@router.get("/dms",response_model=List[DmsOut])
 async def get_dms(current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
-    dms = await db.execute(select(models.Users.profile, models.Users.username, models.Dms.id).join(models.Dms, or_(and_(
+    dms = await db.execute(select(models.Users.profile, models.Users.username, models.Users.status,models.Dms.id).join(models.Dms, or_(and_(
         models.Dms.receiver == current_user.username, models.Dms.sender == models.Users.username), and_(
         models.Dms.sender == current_user.username, models.Dms.receiver == models.Users.username))).filter(
         models.Users.username != current_user.username))
     dms = dms.all()
-    dms_json = [{"id":dm.id,"username": dm.username,"profile":dm.profile,"status":redis_client.get(f"{dm.username}-status")
-    if redis_client.get(f"{dm.username}-status") is not None else "offline"} for dm in dms]
-    return dms_json
-
-@router.get("/dm/{dm}")
+    return dms
+@router.get("/dm/{dm}",response_model=DmsOut)
 async def get_dm_information(dm:int, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
     in_dm = await db.execute(select(models.Dms).filter(or_(and_(models.Dms.sender == current_user.username,models.Dms.id == dm),
                                             and_(models.Dms.receiver == current_user.username,models.Dms.id == dm))))
     in_dm = in_dm.scalars().first()
     if not in_dm:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="You are not a part of this dm")
-    dm = await db.execute(select(models.Users.profile, models.Users.username, models.Dms.id).join(models.Dms, and_(models.Dms.id == dm, or_(and_(
+    dm = await db.execute(select(models.Users.profile, models.Users.username, models.Users.status,models.Dms.id).join(models.Dms, and_(models.Dms.id == dm, or_(and_(
         models.Dms.receiver == current_user.username, models.Dms.sender == models.Users.username), and_(
         models.Dms.sender == current_user.username, models.Dms.receiver == models.Users.username)))).filter(
         models.Users.username != current_user.username))
     dm = dm.first()
-    dm_json = {"id":dm.id,"username":dm.username,"profile":dm.profile,"status":redis_client.get(f"{dm.username}-status")
-                if redis_client.get(f"{dm.username}-status") is not None else "offline"}
-    return dm_json
+    return dm
 
-@router.get("/dmmessages/{dm}")
+@router.get("/dmmessages/{dm}",response_model=List[DmMessagesOut])
 async def get_dm_messages(dm:int, current_user: models.Users = Depends(oauth.get_current_user), db:AsyncSession = Depends(get_db)):
     in_dm = await db.execute(select(models.Dms).filter(or_(and_(models.Dms.sender == current_user.username, models.Dms.id == dm),
                                             and_(models.Dms.receiver == current_user.username,models.Dms.id == dm))))
@@ -64,13 +60,10 @@ async def get_dm_messages(dm:int, current_user: models.Users = Depends(oauth.get
     if not in_dm:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a part of this dm")
     dm_messages = await db.execute(select(models.Dm_Messages.dm, models.Dm_Messages.username, models.Dm_Messages.link,models.Dm_Messages.text, models.Dm_Messages.file,
-                        models.Dm_Messages.created_date, models.Dm_Messages.filetype,models.Dm_Messages.serverinviteid,models.Server.name,
-                        models.Server.profile.label("serverprofile"),models.Users.profile)\
+                        models.Dm_Messages.created_date.label("date"), models.Dm_Messages.filetype,models.Dm_Messages.serverinviteid,models.Server.name.label("servername"),
+                        models.Server.profile.label("serverprofile"),models.Users.profile,models.Users.status)\
                         .outerjoin(models.Server,models.Server.id == models.Dm_Messages.serverinviteid).join\
                         (models.Users,models.Dm_Messages.username == models.Users.username)\
                         .filter(models.Dm_Messages.dm == dm).order_by(models.Dm_Messages.id))
     dm_messages = dm_messages.all()
-    dm_messages_json = [{"dm":message.dm,"username":message.username,"link":message.link,"text":message.text,"file":message.file,"filetype":message.filetype,
-                         "date":message.created_date,"profile":message.profile,"servername":message.name,"serverprofile":message.serverprofile}
-                        for message in dm_messages]
-    return dm_messages_json
+    return dm_messages
