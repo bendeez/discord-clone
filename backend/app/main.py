@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import dms,friend_requests,friends,notifications,servers,user
+from app.routers import dms, friend_requests, friends, notifications, servers, user
 from app.routers.server_websocket import server_websocket
 
 app = FastAPI()
@@ -20,8 +20,3 @@ app.include_router(notifications.router)
 app.include_router(servers.router)
 app.include_router(server_websocket.router)
 app.include_router(user.router)
-
-
-
-
-

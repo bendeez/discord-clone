@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 
+
 class FriendRequestIn(BaseModel):
-    username:str
+    username: str
+
 
 class FriendRequestOut(BaseModel):
-    sender:str
-    senderprofile:str
-    receiver:str
-    receiverprofile:str
+    sender: str
+    senderprofile: str
+    receiver: str
+    receiverprofile: str

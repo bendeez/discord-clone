@@ -5,5 +5,3 @@ from app.models.friends import *
 from app.models.notifications import *
 from app.models.servers import *
 from app.models.user import *
-
-

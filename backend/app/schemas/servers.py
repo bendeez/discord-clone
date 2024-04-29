@@ -7,9 +7,11 @@ from typing import Optional
 class ServerUserOut(UserOut):
     status: str
 
+
 class ServerIn(BaseModel):
-    name:str
+    name: str
     profile: Optional[str] = None
+
 
 class ServersOut(BaseModel):
     id: int
@@ -17,8 +19,10 @@ class ServersOut(BaseModel):
     profile: str
     name: str
 
+
 class UserServer(BaseModel):
-    link:str
+    link: str
+
 
 class ServerMessagesOut(Messages):
     server: int

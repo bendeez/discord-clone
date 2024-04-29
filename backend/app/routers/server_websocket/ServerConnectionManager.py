@@ -8,15 +8,17 @@ from app.models.servers import Server_Messages
 from app.models.dms import Dm_Messages
 import redis
 
-redis_client = redis.Redis(host="redis",port=6379,db=0,decode_responses=True)
+redis_client = redis.Redis(host="redis", port=6379, db=0, decode_responses=True)
 
-async def send_notification(websocket:WebSocket,data:dict,current_user:dict,db:AsyncSession):
+
+async def send_notification(websocket: WebSocket, data: dict, current_user: dict, db: AsyncSession):
     dm = data["dm"]
     username = data["username"]
     other_user = data["otheruser"]
     profile = data["profile"]
-    notification = {"chat": "notification", "type": "message","dm":dm,"sender":username,"receiver":other_user,"profile":profile}
-    await server_manager.broadcast(websocket, notification, current_user,db)
+    notification = {"chat": "notification", "type": "message", "dm": dm, "sender": username, "receiver": other_user,
+                    "profile": profile}
+    await server_manager.broadcast(websocket, notification, current_user, db)
 
 
 async def save_message(data: dict, db: AsyncSession):
@@ -33,20 +35,20 @@ async def save_message(data: dict, db: AsyncSession):
             file = data["file"]
             file_type = data["filetype"]
             message = Dm_Messages(file=file, filetype=file_type, username=username, dm=dm,
-                                         created_date=datetime.now())
+                                  created_date=datetime.now())
             db.add(message)
         if type == "textandfile":
             text = data["text"]
             file = data["file"]
             file_type = data["filetype"]
             message = Dm_Messages(text=text, file=file, filetype=file_type, username=username, dm=dm,
-                                         created_date=datetime.now())
+                                  created_date=datetime.now())
             db.add(message)
         if type == "link":
             link = data["link"]
             server_invite_id = data["serverinviteid"]
             message = Dm_Messages(link=link, username=username, dm=dm, serverinviteid=server_invite_id,
-                                         created_date=datetime.now())
+                                  created_date=datetime.now())
             db.add(message)
             redis_client.set(link, server_invite_id)
     if chat == "server":
@@ -54,27 +56,27 @@ async def save_message(data: dict, db: AsyncSession):
         if type == "text":
             text = data["text"]
             message = Server_Messages(text=text, username=username, server=server,
-                                             created_date=datetime.now())
+                                      created_date=datetime.now())
             db.add(message)
         if type == "file":
             file = data["file"]
             file_type = data["filetype"]
             message = Server_Messages(file=file, filetype=file_type, username=username, server=server,
-                                             created_date=datetime.now())
+                                      created_date=datetime.now())
             db.add(message)
         if type == "textandfile":
             text = data["text"]
             file = data["file"]
             file_type = data["filetype"]
             message = Server_Messages(text=text, file=file, filetype=file_type, username=username,
-                                             server=server, created_date=datetime.now())
+                                      server=server, created_date=datetime.now())
             db.add(message)
         if type == "announcement":
             username = data["username"]
             announcement = data["announcement"]
             server = data["server"]
             message = Server_Messages(announcement=announcement, username=username, server=server,
-                                             created_date=datetime.now())
+                                      created_date=datetime.now())
             db.add(message)
     if chat == "notification":
         dm = data["dm"]
@@ -90,30 +92,35 @@ async def save_message(data: dict, db: AsyncSession):
             save_notification = Notifications(sender=sender, receiver=receiver, dm=dm, count=count)
             db.add(save_notification)
     await db.commit()
+
+
 class ServerConnectionManager:
     def __init__(self):
-        self.active_connections: list[dict[str,Union[list[int],str,WebSocket]]] = []
-    async def connect(self,websocket:WebSocket,current_user:dict):
+        self.active_connections: list[dict[str, Union[list[int], str, WebSocket]]] = []
+
+    async def connect(self, websocket: WebSocket, current_user: dict):
         await websocket.accept()
         self.active_connections.append(current_user)
-    def disconnect(self,websocket:WebSocket,current_user:dict):
+
+    def disconnect(self, websocket: WebSocket, current_user: dict):
         self.active_connections.remove(current_user)
-    async def broadcast(self,websocket:WebSocket,data:dict,current_user:dict,db:AsyncSession):
+
+    async def broadcast(self, websocket: WebSocket, data: dict, current_user: dict, db: AsyncSession):
         try:
             chat = data.get("chat")
             if chat == "dm":
                 dm = data.get("dm")
-                if dm in current_user.get("dm_ids",[]):
+                if dm in current_user.get("dm_ids", []):
                     for connection in self.active_connections:
-                        if dm in connection.get("dm_ids",[]):
+                        if dm in connection.get("dm_ids", []):
                             await connection.get("websocket").send_json(data)
-                    await save_message(data,db)
-                    await send_notification(websocket,data,current_user,db)
+                    await save_message(data, db)
+                    await send_notification(websocket, data, current_user, db)
             elif chat == "server":
                 server = data.get("server")
-                if server in current_user.get("server_ids",[]):
+                if server in current_user.get("server_ids", []):
                     for connection in self.active_connections:
-                        if server in connection.get("server_ids",[]):
+                        if server in connection.get("server_ids", []):
                             await connection.get("websocket").send_json(data)
                     await save_message(data, db)
             elif chat == "notification":
@@ -128,15 +135,16 @@ class ServerConnectionManager:
         except Exception as e:
             print(e)
 
-    async def broadcast_from_route(self,sender_username:str,message:dict,db:AsyncSession):
+    async def broadcast_from_route(self, sender_username: str, message: dict, db: AsyncSession):
         for connection in self.active_connections:
             if connection.get("username") == sender_username:
                 await server_manager.broadcast(connection.get("websocket"), message, connection, db)
 
-    def add_valid_server_or_dm(self,usernames:list,type,id):
+    def add_valid_server_or_dm(self, usernames: list, type, id):
         for connection in self.active_connections:
             if connection.get("username") in usernames:
-                if isinstance(connection.get(type),list):
+                if isinstance(connection.get(type), list):
                     connection.get(type).append(int(id))
+
 
 server_manager = ServerConnectionManager()

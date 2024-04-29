@@ -1,5 +1,5 @@
-from pydantic import BaseModel,Base64Str,model_validator,Field
-from typing import Optional,Literal,Union
+from pydantic import BaseModel, Base64Str, model_validator, Field
+from typing import Optional, Literal, Union
 from uuid import uuid4
 
 
@@ -101,4 +101,5 @@ class NotificationAll(BaseModel):
 
 
 class WebsocketData(BaseModel):
-    data: Union[DmWebsocketMessage,ServerWebsocketMessage,Notification,NotificationAll] = Field(...,discriminator='chat')
+    data: Union[DmWebsocketMessage, ServerWebsocketMessage, Notification, NotificationAll] = Field(...,
+                                                                                                   discriminator='chat')

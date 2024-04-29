@@ -3,9 +3,9 @@ from typing import Optional
 from datetime import datetime
 
 
-
 class UserBase(BaseModel):
-    username:str
+    username: str
+
 
 class Messages(BaseModel):
     text: Optional[str] = None

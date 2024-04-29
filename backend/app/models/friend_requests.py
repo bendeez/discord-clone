@@ -1,8 +1,6 @@
 from app.db.base_class import BaseMixin
-from sqlalchemy.orm import Mapped,mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey
-
-
 
 
 class FriendRequests(BaseMixin):
