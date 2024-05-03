@@ -6,6 +6,7 @@ from app.core.config import settings
 from app.models.user import Users
 from app.models.dms import Dms
 from app.models.servers import Server_User
+from app.crud.user import check_user_exists,get_user_data
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,8 +29,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         username = payload.get("username")
         if username is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
-        user = await db.execute(select(Users).filter(Users.username == username))
-        user = user.scalars().first()
+        user = await check_user_exists(db=db,remote_user_username=username)
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
         return user
@@ -47,12 +47,7 @@ async def get_websocket_user(websocket: WebSocket, db: AsyncSession = Depends(ge
         username = payload.get("username")
         if username is None:
             raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
-        user_data = await db.execute(select(Users.username, Dms.id.label("dm_id"),
-                                            Server_User.server_id.label("server_id")).select_from(Users).outerjoin(
-            Dms, or_(Dms.sender == username, Dms.receiver == username)) \
-            .outerjoin(Server_User, Server_User.username == username).filter(
-            Users.username == username))
-        user_data = user_data.all()
+        user_data = await get_user_data(db=db,username=username)
         if not user_data:
             raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
         user_data_json = {"websocket": websocket, "username": user_data[0].username,
