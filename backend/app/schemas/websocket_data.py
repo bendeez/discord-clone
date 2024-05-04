@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Base64Str, model_validator, Field
+from pydantic import BaseModel, model_validator, Field
 from typing import Optional, Literal, Union
 from uuid import uuid4
+import base64
 
 
 class DmWebsocketMessage(BaseModel):
@@ -10,7 +11,7 @@ class DmWebsocketMessage(BaseModel):
     link: Optional[str] = None
     serverinviteid: Optional[int] = None
     text: Optional[str] = None
-    file: Optional[Base64Str] = None
+    file: Optional[str] = None # will convert into bytes
     filetype: Optional[str] = None
     otheruser: str
     username: str
@@ -29,9 +30,13 @@ class DmWebsocketMessage(BaseModel):
         elif self.type == "file":
             if self.file is None or self.filetype is None:
                 raise Exception("Either a file or/and filetype was not sent")
+            else:
+                self.file = base64.b64decode(self.file.split(",")[1])
         elif self.type == "textandfile":
             if self.text is None or self.file is None or self.filetype is None:
                 raise Exception("Either a file or/and filetype or/and text was not sent")
+            else:
+                self.file = base64.b64decode(self.file.split(",")[1])
         else:
             raise Exception("invalid message type")
         return self
@@ -43,7 +48,7 @@ class ServerWebsocketMessage(BaseModel):
     server: int
     announcement: Optional[str] = None
     text: Optional[str] = None
-    file: Optional[Base64Str] = None
+    file: Optional[str] = None # will convert into bytes
     filetype: Optional[str] = None
     username: str
     profile: str
@@ -60,9 +65,13 @@ class ServerWebsocketMessage(BaseModel):
         elif self.type == "file":
             if self.file is None or self.filetype is None:
                 raise Exception("Either a file or/and filetype was not sent")
+            else:
+                self.file = base64.b64decode(self.file.split(",")[1])
         elif self.type == "textandfile":
             if self.text is None or self.file is None or self.filetype is None:
                 raise Exception("Either a file or/and filetype or/and text was not sent")
+            else:
+                self.file = base64.b64decode(self.file.split(",")[1])
         else:
             raise Exception("invalid message type")
         return self
@@ -101,5 +110,5 @@ class NotificationAll(BaseModel):
 
 
 class WebsocketData(BaseModel):
-    data: Union[DmWebsocketMessage, ServerWebsocketMessage, Notification, NotificationAll] = Field(...,
-                                                                                                   discriminator='chat')
+    data: Union[DmWebsocketMessage, ServerWebsocketMessage, Notification, NotificationAll] = Field(...,discriminator='chat')
+

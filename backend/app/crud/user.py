@@ -22,7 +22,7 @@ async def update_current_profile_picture(db: AsyncSession, current_user: Users, 
 
 
 async def get_user_data(db: AsyncSession, username):
-    user_data = await db.execute(select(Users.username, Dms.id.label("dm_id"),
+    user_data = await db.execute(select(Users.username,Users.status,Dms.id.label("dm_id"),
                                         Server_User.server_id.label("server_id"))
                                  .select_from(Users)
                                  .outerjoin(

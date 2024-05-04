@@ -3,11 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status, WebSocket, WebSocketException
 from app.db.database import get_db
 from app.core.config import settings
-from app.models.user import Users
-from app.models.dms import Dms
-from app.models.servers import Server_User
 from app.crud.user import check_user_exists,get_user_data
-from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 SECRET_KEY = settings.JWT_SECRET_KEY
@@ -50,9 +46,12 @@ async def get_websocket_user(websocket: WebSocket, db: AsyncSession = Depends(ge
         user_data = await get_user_data(db=db,username=username)
         if not user_data:
             raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+        user = await check_user_exists(db=db, remote_user_username=username)
+        if not user:
+            raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
         user_data_json = {"websocket": websocket, "username": user_data[0].username,
                           "server_ids": list(set(user.server_id for user in user_data)),
-                          "dm_ids": list(set(user.dm_id for user in user_data))}
+                          "dm_ids": list(set(user.dm_id for user in user_data)),"user_model":user}
         return user_data_json
     except JWTError:
         raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)

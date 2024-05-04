@@ -26,7 +26,7 @@ async def create_server(server: ServerIn, current_user: Users = Depends(get_curr
     created_message = {"chat": "server", "server": server_id, "type": "announcement",
                        "announcement": f"{server_owner} has created the server", "username": server_owner,
                        "date": datetime.now().isoformat()}
-    server_manager.broadcast_from_route(sender_username=current_user.username, message=created_message, db=db)
+    await server_manager.broadcast_from_route(sender_username=current_user.username, message=created_message, db=db)
     await db.commit()
 
 
