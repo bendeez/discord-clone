@@ -3,7 +3,7 @@ from app.routers.server_websocket.ServerConnectionManager import server_manager
 from app.core.oauth import get_websocket_user
 from app.firebase.firebase_startup import firebase_storage
 from app.db.database import get_db
-from app.schemas.websocket_data import WebsocketData
+from app.schemas.websocket_data.websocket_data import WebsocketData
 from app.crud.server_websocket import set_user_status
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,7 +24,7 @@ async def server(token: str, websocket: WebSocket, current_user: dict = Depends(
             if data.type == "file" or data.type == "textandfile":
                 file_type = data.filetype
                 filename = f"{uuid.uuid4()}.{file_type}"
-                await asyncio.to_thread(firebase_storage.child(filename).put, data.file)
+                await asyncio.to_thread(firebase_storage.child(filename).put, data.encoded_file)
                 data.file = f"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8"
             await server_manager.broadcast(websocket, dict(data), current_user,db)
     except WebSocketDisconnect:

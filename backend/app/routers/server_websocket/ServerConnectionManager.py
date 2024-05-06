@@ -1,7 +1,8 @@
 from fastapi import WebSocket
 from typing import Union
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.crud.server_websocket import save_message,send_notification
+from app.crud.server_websocket import save_message, send_notification
+
 
 class ServerConnectionManager:
     def __init__(self):
@@ -14,15 +15,15 @@ class ServerConnectionManager:
     def disconnect(self, websocket: WebSocket, current_user: dict):
         self.active_connections.remove(current_user)
 
-    async def broadcast(self, websocket: WebSocket, data: dict, current_user: dict,db:AsyncSession):
+    async def broadcast(self, websocket: WebSocket, data: dict, current_user: dict, db: AsyncSession):
         try:
             chat = data.get("chat")
-            if chat == "dm":
-                dm = data.get("dm")
-                if dm in current_user.get("dm_ids", []):
-                    for connection in self.active_connections:
-                        if dm in connection.get("dm_ids", []):
-                            await connection.get("websocket").send_json(data)
+            if chat == "dm": # checks if the message is being sent to a dm
+                dm = data.get("dm") # get the dm id
+                if dm in current_user.get("dm_ids", []):  # checks if the dm id is a part of the user's dms
+                    for connection in self.active_connections: # loops through all connections
+                        if dm in connection.get("dm_ids", []): # checks if the dm id is a part of the remote user's dms
+                            await connection.get("websocket").send_json(data) # sends a message if it is
                     await save_message(data=dict(data), db=db)
                     await send_notification(websocket=websocket, data=dict(data), current_user=current_user, db=db)
             elif chat == "server":
@@ -47,7 +48,7 @@ class ServerConnectionManager:
     async def broadcast_from_route(self, sender_username: str, message: dict, db: AsyncSession):
         for connection in self.active_connections:
             if connection.get("username") == sender_username:
-                await server_manager.broadcast(connection.get("websocket"), message, connection,db)
+                await server_manager.broadcast(connection.get("websocket"), message, connection, db)
 
     def add_valid_server_or_dm(self, usernames: list, type, id):
         for connection in self.active_connections:
