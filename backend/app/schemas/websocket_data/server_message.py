@@ -5,9 +5,6 @@ import base64
 
 class ServerWebsocketMessageBase(BaseModel):
     server: int
-    username: str
-    profile: str
-    date: str
 
 class ServerWebsocketText(ServerWebsocketMessageBase):
     chat: Literal['server']

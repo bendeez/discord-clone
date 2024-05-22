@@ -8,7 +8,6 @@ import uuid
 import base64
 import asyncio
 
-
 async def create_new_server(db: AsyncSession, server: ServerIn, current_user_username: str):
     if server.profile:
         filename = f"{uuid.uuid4()}.jpg"

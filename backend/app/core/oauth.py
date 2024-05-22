@@ -49,7 +49,7 @@ async def get_websocket_user(websocket: WebSocket, db: AsyncSession = Depends(ge
         user = await check_user_exists(db=db, remote_user_username=username)
         if not user:
             raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
-        user_data_json = {"websocket": websocket, "username": user_data[0].username,
+        user_data_json = {"websocket": websocket, "username": user_data[0].username,"profile": user_data[0].profile,
                           "server_ids": list(set(user.server_id for user in user_data)),
                           "dm_ids": list(set(user.dm_id for user in user_data)),"user_model":user}
         return user_data_json

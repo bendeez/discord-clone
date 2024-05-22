@@ -7,9 +7,6 @@ from uuid import uuid4
 class DmWebsocketMessageBase(BaseModel):
     dm: int
     otheruser: str
-    username: str
-    profile: str
-    date: str
 
 class DmWebsocketText(DmWebsocketMessageBase):
     chat: Literal['dm']
