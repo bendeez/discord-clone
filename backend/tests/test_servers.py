@@ -86,7 +86,8 @@ async def test_join_server(http_request,websocket_connection,tokens,get_user_by_
         """
         dm = current_user.sent_dms[0]
         server = current_user.owned_servers[0]
-        await current_user_ws.send_json({"chat":"dm","type":"link","serverinviteid":server.id,"dm":dm.id,"otheruser":remote_user.username})
+        await current_user_ws.send_json({"chat":"dm","type":"link","serverinviteid":server.id,"servername":server.name,
+                                         "serverprofile":server.profile,"dm":dm.id,"otheruser":remote_user.username})
 
         async def wait_for_remote_user_to_join():
             while True:
@@ -139,7 +140,7 @@ async def test_invalid_link(http_request,usernames,tokens):
 async def test_get_server_messages(http_request,get_user_by_username_index,usernames,tokens,clean_up_data):
     """
         there's only one message in the server
-        except for a message from a previous test that will be deleted
+        except for a message from a previous frontend that will be deleted
         sent by the current user (usernames[0])
         Server_Messages(text="hi",user=user_models[0],date=datetime.now())
     """

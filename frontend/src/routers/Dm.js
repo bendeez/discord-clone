@@ -174,7 +174,7 @@ export default function Dm(){
         const response = await fetch(url,requestOptions)
         const data = await response.json()
         if(response.status !== 403 && response.status !== 409){
-            navigate("/server/" + data.serverid)
+            navigate("/server/" + data.server_id)
             getServers()
         }
     }

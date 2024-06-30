@@ -43,15 +43,12 @@ async def get_websocket_user(websocket: WebSocket, db: AsyncSession = Depends(ge
         username = payload.get("username")
         if username is None:
             raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
-        user_data = await get_user_data(db=db,username=username)
-        if not user_data:
+        user = await get_user_data(db=db,username=username)
+        if user is None:
             raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
-        user = await check_user_exists(db=db, remote_user_username=username)
-        if not user:
-            raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
-        user_data_json = {"websocket": websocket, "username": user_data[0].username,"profile": user_data[0].profile,
-                          "server_ids": list(set(user.server_id for user in user_data)),
-                          "dm_ids": list(set(user.dm_id for user in user_data)),"user_model":user}
+        user_data_json = {"websocket": websocket, "username": user.username,"profile": user.profile,
+                          "server_ids": [server.server_id for server in user.server_associations],
+                          "dm_ids": [dm.id for dm in user.sent_dms + user.received_dms],"user_model":user}
         return user_data_json
     except JWTError:
         raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)

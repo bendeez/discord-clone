@@ -1,10 +1,13 @@
-from pydantic import BaseModel, Field, computed_field
-from typing import Literal, Union, Annotated
-import base64
+from pydantic import BaseModel, Field
+from typing import Literal, Union, Annotated, Optional
+from datetime import datetime
 
 
 class ServerWebsocketMessageBase(BaseModel):
     server: int
+    username: Optional[str] = None
+    profile: Optional[str] = None
+    date: Optional[datetime] = None
 
 class ServerWebsocketText(ServerWebsocketMessageBase):
     chat: Literal['server']
@@ -16,10 +19,6 @@ class ServerWebsocketFile(ServerWebsocketMessageBase):
     type: Literal["file"]
     file: str
     filetype: str
-
-    @computed_field()
-    def encoded_file(self) -> Union[bytes, None]:
-        return base64.b64decode(self.file.split(",")[1])
 
 class ServerWebsocketTextAndFile(ServerWebsocketText,ServerWebsocketFile):
     chat: Literal['server']

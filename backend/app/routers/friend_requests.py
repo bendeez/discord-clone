@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.schemas.friend_requests import FriendRequestIn, FriendRequestOut
+from app.schemas.friend_requests import FriendRequestIn, FriendRequestOut, FriendRequestCreated
 from app.db.database import get_db
-from app.crud.friend_requests import check_friend_request, create_friend_request, get_all_friend_requests
+from app.crud.friend_requests import check_friend_request, create_friend_request, get_all_friend_requests, \
+                                     get_friend_request
 from app.crud.friends import check_already_friends
 from app.crud.user import check_user_exists
 from app.models.user import Users
@@ -11,8 +12,7 @@ from typing import List
 
 router = APIRouter()
 
-
-@router.post("/friendrequest")
+@router.post("/friendrequest",status_code=status.HTTP_201_CREATED, response_model=FriendRequestCreated)
 async def send_friend_request(friend_request: FriendRequestIn, current_user: Users = Depends(get_current_user),
                               db: AsyncSession = Depends(get_db)):
     if friend_request.username == current_user.username:
@@ -20,30 +20,31 @@ async def send_friend_request(friend_request: FriendRequestIn, current_user: Use
     user_exists = await check_user_exists(db=db, remote_user_username=friend_request.username)
     if not user_exists:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User does not exist")
-    already_friend_request = await check_friend_request(db=db, current_user_username=current_user.username,
+    already_friend_request = await check_friend_request(db=db, current_user=current_user,
                                                         remote_user_username=friend_request.username)
     if already_friend_request:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Friend request already sent")
-    already_friends = await check_already_friends(db=db, current_user_username=current_user.username,
+    already_friends = await check_already_friends(db=db, current_user=current_user,
                                                   remote_user_username=friend_request.username)
     if already_friends:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You are already friends with that user")
-    await create_friend_request(db=db, current_user_username=current_user.username,
+    friend_request = await create_friend_request(db=db, current_user=current_user,
                                 remote_user_username=friend_request.username)
+    return friend_request
 
 
 @router.get("/friendrequests", response_model=List[FriendRequestOut])
 async def get_friend_requests(current_user: Users = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    friend_requests = await get_all_friend_requests(db=db, current_user_username=current_user.username)
+    friend_requests = await get_all_friend_requests(db=db, current_user=current_user)
     return friend_requests
 
 
-@router.delete("/friendrequest")
+@router.delete("/friendrequest",status_code=status.HTTP_204_NO_CONTENT)
 async def delete_friend_request(friend_request: FriendRequestIn, current_user: Users = Depends(get_current_user),
                                 db: AsyncSession = Depends(get_db)):
-    friend_request = await check_friend_request(db=db, current_user_username=current_user.username,
+    current_friend_request = await get_friend_request(db=db, current_user=current_user,
                                                 remote_user_username=friend_request.username)
-    if not friend_request:
+    if current_friend_request is None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Friend request already deleted")
-    await db.delete(friend_request)
+    await db.delete(current_friend_request)
     await db.commit()

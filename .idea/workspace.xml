@@ -5,7 +5,106 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fbb3eb7a-d855-4cfe-98dc-aead60164257" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/pythonProject86.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pythonProject86.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/alembic.ini" beforeDir="false" afterPath="$PROJECT_DIR$/backend/alembic.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/alembic/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/alembic/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/core/oauth.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/core/oauth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/crud/dms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/crud/dms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/crud/friend_requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/crud/friend_requests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/crud/friends.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/crud/friends.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/crud/notifications.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/crud/notifications.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/crud/server_websocket.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/crud/server_websocket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/crud/servers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/crud/servers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/crud/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/crud/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/db/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/db/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/dms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/dms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/friend_requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/friend_requests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/friends.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/friends.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/notifications.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/notifications.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/servers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/servers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/models/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/models/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/dms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/dms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/friend_requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/friend_requests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/friends.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/friends.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/notifications.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/notifications.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/server_websocket/ServerConnectionManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/server_websocket/ServerConnectionManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/server_websocket/server_websocket.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/server_websocket/server_websocket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/servers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/servers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/dms.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/dms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/friend_requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/friend_requests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/friends.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/friends.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/servers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/servers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/websocket_data/dm_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/websocket_data/dm_message.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/websocket_data/notification_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/websocket_data/notification_message.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/websocket_data/notificationall_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/websocket_data/notificationall_message.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/websocket_data/server_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/websocket_data/server_message.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/tests/test_servers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/tests/test_servers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/mime.types" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/mime.types" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/nginx.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/public/directmessages.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/public/directmessages.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/public/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/public/loginbackground.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/public/loginbackground.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/public/logo192.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/public/logo192.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/public/logo512.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/public/logo512.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/public/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/public/manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/public/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/public/robots.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/App.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/Context.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/Context.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/logo.svg" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/logo.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/reportWebVitals.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/reportWebVitals.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/ActiveNow.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/ActiveNow.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/ActiveNow.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/ActiveNow.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/CreateServer.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/CreateServer.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/CreateServer.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/CreateServer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Dm.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Dm.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Dm.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Dm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Dms.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Dms.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Dms.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Dms.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Home.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Home.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Home.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Home.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/InviteUsers.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/InviteUsers.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/InviteUsers.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/InviteUsers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Login.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Login.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Login.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Login.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Profile.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Profile.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Profile.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Profile.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Register.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Register.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Register.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Register.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Server.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Server.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Server.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Server.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/ServerChat.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/ServerChat.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/ServerChat.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/ServerChat.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/ServerTopics.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/ServerTopics.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/ServerTopics.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/ServerTopics.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/ServerUsers.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/ServerUsers.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/ServerUsers.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/ServerUsers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Servers.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Servers.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/Servers.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/Servers.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/UserBox.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/UserBox.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/UserBox.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/UserBox.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/requests/AddFriend.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/requests/AddFriend.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/requests/AllFriends.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/requests/AllFriends.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/requests/Blocked.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/requests/Blocked.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/requests/FriendRequests.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/requests/FriendRequests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/requests/Online.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/requests/Online.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/requests/Requests.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/requests/Requests.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/requests/Requests.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/requests/Requests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/requests/RequestsNav.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/requests/RequestsNav.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/routers/requests/RequestsNav.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/routers/requests/RequestsNav.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/src/setupTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/setupTests.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,15 +129,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "last_opened_file_path": "C:/Users/User/PycharmProjects/pythonProject/pythonProject86/app",
-    "settings.editor.selected.configurable": "copyright.filetypes.Properties"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/User/PycharmProjects/pythonProject/pythonProject86/backend/tests&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;copyright.filetypes.Properties&quot;
   }
-}]]></component>
+}</component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
       <console-settings module-name="pythonProject86" is-module-sdk="true">
@@ -49,18 +148,19 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend\tests" />
       <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\app" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend" />
-      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend\app\routers\server_websocket" />
       <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend\app\core" />
-      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend\app\db" />
-      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\app" />
+      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend\app" />
+      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86" />
+      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend\app\schemas\websocket_data" />
+      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.test_websocket_data">
-    <configuration name="database_connection (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.test1 (1)">
+    <configuration name="env" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="pythonProject86" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -68,11 +168,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend/alembic" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/database_connection.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/alembic/env.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -110,11 +210,32 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend/app/core" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/test1.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/app/core/test1.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test1" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="pythonProject86" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test1.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -144,55 +265,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test_websocket_data" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests in test_user.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="pythonProject86" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/test_websocket_data.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="websocket_data" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="pythonProject86" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend/app/schemas" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/backend/app/schemas/websocket_data.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/backend/tests/test_user.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.test_websocket_data" />
-        <item itemvalue="Python.websocket_data" />
         <item itemvalue="Python.test1 (1)" />
-        <item itemvalue="Python.database_connection (1)" />
+        <item itemvalue="Python.test1" />
         <item itemvalue="Python.test2" />
+        <item itemvalue="Python.env" />
+        <item itemvalue="Python tests.Python tests in test_user.py" />
       </list>
     </recent_temporary>
   </component>

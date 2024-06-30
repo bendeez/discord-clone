@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile
-from app.schemas.user import UserCreate, UserIn, UserOut
+from app.schemas.user import UserCreate, UserIn, UserOut, UserCreated
 from app.crud.user import check_user_exists, create_new_user, update_current_profile_picture
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
@@ -13,13 +13,14 @@ import asyncio
 router = APIRouter()
 
 
-@router.post("/user")
+@router.post("/user", status_code=status.HTTP_201_CREATED, response_model=UserCreated)
 async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     existing_user = await check_user_exists(db=db, remote_user_username=user.username)
     if existing_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists")
     password = hash(user.password)
-    await create_new_user(db=db, username=user.username, email=user.email, password=password)
+    user = await create_new_user(db=db, username=user.username, email=user.email, password=password)
+    return user
 
 
 @router.post("/login")

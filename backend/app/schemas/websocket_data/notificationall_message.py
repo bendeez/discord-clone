@@ -1,8 +1,10 @@
 from pydantic import BaseModel, Field
-from typing import Literal, Union, Annotated
+from typing import Literal, Union, Annotated, Optional
 
+class NotificationAllMessageBase(BaseModel):
+    username: Optional[str] = None
 
-class NotificationAllStatus(BaseModel):
+class NotificationAllStatus(NotificationAllMessageBase):
     chat: Literal['notificationall']
     type: Literal["status"]
     status: str

@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: discord
+      POSTGRES_DB: test_discord
+  redis:
+    image: redis
+    ports:
+      - 6379:6379

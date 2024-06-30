@@ -11,3 +11,6 @@ class UserOut(UserBase):
 
 class UserCreate(UserIn):
     email: str
+
+class UserCreated(UserBase):
+    email: str

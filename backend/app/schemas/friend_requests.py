@@ -10,3 +10,8 @@ class FriendRequestOut(BaseModel):
     senderprofile: str
     receiver: str
     receiverprofile: str
+
+class FriendRequestCreated(BaseModel):
+    id: int
+    sender: str
+    receiver: str

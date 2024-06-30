@@ -1,12 +1,15 @@
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field
 from typing import Literal, Union, Annotated
-import base64
-from uuid import uuid4
+from typing import Optional
+from datetime import datetime
 
 
 class DmWebsocketMessageBase(BaseModel):
     dm: int
     otheruser: str
+    username: Optional[str] = None
+    profile: Optional[str] = None
+    date: Optional[datetime] = None
 
 class DmWebsocketText(DmWebsocketMessageBase):
     chat: Literal['dm']
@@ -19,10 +22,6 @@ class DmWebsocketFile(DmWebsocketMessageBase):
     file: str
     filetype: str
 
-    @computed_field()
-    def encoded_file(self) -> Union[bytes, None]:
-        return base64.b64decode(self.file.split(",")[1])
-
 class DmWebsocketTextAndFile(DmWebsocketText,DmWebsocketFile):
     chat: Literal['dm']
     type: Literal["textandfile"]
@@ -31,9 +30,8 @@ class DmWebsocketLink(DmWebsocketMessageBase):
     chat: Literal['dm']
     type: Literal["link"]
     serverinviteid: int
-
-    @computed_field()
-    def link(self) -> str:
-        return str(uuid4())
+    servername: str
+    serverprofile: str
+    link: str = None
 
 DmWebsocketMessage = Annotated[Union[DmWebsocketText,DmWebsocketFile,DmWebsocketTextAndFile,DmWebsocketLink] ,Field(...,discriminator='type')]

@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: discord
+      POSTGRES_DB: discord
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+  app:
+    image: bendeez/discord-clone:app
+    depends_on:
+      - postgres
+    ports:
+      - 8000:80
+    env_file: backend/app/.env.dev
+    command: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 80"
+  frontend:
+    image: bendeez/discord-clone:frontend
+    ports:
+      - 3000:3000

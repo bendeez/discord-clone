@@ -1,5 +1,11 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import BaseModel
+import os
+
+if "tests" in os.listdir(os.getcwd()): # backend directory
+    ENV = "test"
+else:
+    ENV = "dev"
 
 class FirebaseConfig(BaseModel):
     apiKey: str
@@ -10,6 +16,7 @@ class FirebaseConfig(BaseModel):
     messagingSenderId: str
     appId: str
     measurementId: str
+
 class Settings(BaseSettings):
     FIREBASE_CONFIG: FirebaseConfig
     JWT_SECRET_KEY: str
@@ -19,8 +26,10 @@ class Settings(BaseSettings):
     DATABASE_USERNAME: str
     DATABASE_PASSWORD: str
     DATABASE_HOST: str
+    REDIS_HOST: str
+    REDIS_PORT: str
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=f"./app/.env.{ENV}")
 
 
 settings = Settings()
