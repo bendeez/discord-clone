@@ -17,6 +17,12 @@ from app.core.utils import hash
 from datetime import datetime
 from functools import reduce
 
+"""
+    Note: Implement a way to test
+    locally so I can have direct
+    access to the domain logic
+    such as websocket connection manager
+"""
 
 @pytest.fixture(name="db",scope="session",autouse=True)
 async def create_db_session():

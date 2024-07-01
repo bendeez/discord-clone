@@ -11,10 +11,11 @@ async def check_already_friends(db: AsyncSession, current_user: Users, remote_us
                                             .options(selectinload(Users.sent_friends),
                                                      selectinload(Users.received_friends)))
     current_user_friends = current_user_friends.scalars().first()
-    if remote_user_username in [friend.receiver for friend in current_user_friends.sent_friends] + \
-                               [friend.sender for friend in current_user_friends.received_friends]:
-        return True
-    return False
+    if current_user_friends is not None:
+        if remote_user_username in [friend.receiver for friend in current_user_friends.sent_friends] + \
+                                   [friend.sender for friend in current_user_friends.received_friends]:
+            return True
+        return False
 
 
 async def create_friend(db: AsyncSession, current_user: Users, remote_user_username: str):

@@ -45,8 +45,9 @@ async def check_user_in_server(db: AsyncSession, server_id: int, current_user: U
                           .options(selectinload(Server.server_users)
                                    .selectinload(Server_User.user)))
     server = server.scalars().first()
-    if current_user in [server_user.user for server_user in server.server_users]:
-        return True
+    if server is not None:
+        if current_user in [server_user.user for server_user in server.server_users]:
+            return True
     return False
 
 
@@ -72,15 +73,14 @@ async def add_user_to_server(db: AsyncSession, server_id: int, current_user: Use
 
 
 async def get_all_server_messages(db: AsyncSession, server_id: int):
-    server_messages = await db.execute(select(Server.id.label("server"),
+    server_messages = await db.execute(select(Server_Messages.server,
                                               Server_Messages.announcement,
                                               Server_Messages.text,Server_Messages.file,
                                               Server_Messages.filetype,
                                               Server_Messages.date,
                                               Users.username,Users.profile)
-                                            .join_from(Server,Server.server_messages)
                                             .join_from(Server_Messages,Server_Messages.user)
-                                            .where(Server.id == server_id)
+                                            .where(Server_Messages.server == server_id)
                                             .order_by(Server_Messages.id))
 
     return server_messages.all()

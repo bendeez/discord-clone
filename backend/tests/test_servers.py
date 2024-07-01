@@ -61,6 +61,12 @@ async def test_get_server_information(http_request,get_user_by_username_index,to
     assert response.status == 200
     assert data == {"id": server.id, "profile": server.profile, "owner": server.owner,"name": f"{server.owner} server"}
 
+async def test_get_server_information_forbidden(http_request,usernames,tokens):
+    """
+        user with username of usernames[2] is not a part of that server
+    """
+    response = await http_request(f"/server/77", method=RequestMethod.GET, token=tokens[usernames[2]])
+    assert response.status == 403
 async def test_get_server_users(http_request,get_user_by_username_index,tokens):
     """
         returns users with usernames of usernames[0] and usernames[2]

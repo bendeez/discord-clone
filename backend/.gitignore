@@ -1,4 +1,5 @@
 app/.env.dev
+app/.env.test
 
 .venv/
 

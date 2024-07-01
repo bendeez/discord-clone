@@ -13,9 +13,10 @@ async def check_already_created_dm(db: AsyncSession, current_user: Users, remote
                                 .options(selectinload(Users.sent_dms),
                                          selectinload(Users.received_dms)))
     current_user_dms = current_user_dms.scalars().first()
-    if remote_user_username in [dm.receiver for dm in current_user_dms.sent_dms] + [dm.sender for dm in current_user_dms.received_dms]:
-        return True
-    return False
+    if current_user_dms is not None:
+        if remote_user_username in [dm.receiver for dm in current_user_dms.sent_dms] + [dm.sender for dm in current_user_dms.received_dms]:
+            return True
+        return False
 
 
 
@@ -85,17 +86,16 @@ async def get_all_dm_information(db: AsyncSession, current_user: Users, dm_id: i
 
 
 async def get_all_dm_messages(db: AsyncSession, dm_id: int):
-    dm_messages = await db.execute(select(Dms.id.label("dm"), Dm_Messages.link,
+    dm_messages = await db.execute(select(Dm_Messages.dm, Dm_Messages.link,
                                           Dm_Messages.text, Dm_Messages.file,
                                           Dm_Messages.filetype, Dm_Messages.serverinviteid,
                                           Dm_Messages.date,
                                           Users.username, Users.profile, Users.status,
                                           Server.name.label("servername"),
                                           Server.profile.label("serverprofile"))
-                                   .join_from(Dms, Dms.dm_messages)
                                    .join_from(Dm_Messages, Dm_Messages.user)
                                    .outerjoin_from(Dm_Messages, Dm_Messages.server_invite_info)
-                                   .where(Dms.id == dm_id)
+                                   .where(Dm_Messages.dm == dm_id)
                                    .order_by(Dm_Messages.id))
     return dm_messages.all()
 

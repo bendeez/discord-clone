@@ -11,10 +11,11 @@ async def check_friend_request(db: AsyncSession, current_user: Users, remote_use
                                 .options(selectinload(Users.sent_friend_requests),
                                          selectinload(Users.received_friend_requests)))
     current_user_friend_requests = current_user_friend_requests.scalars().first()
-    if remote_user_username in [friend_request.receiver for friend_request in current_user_friend_requests.sent_friend_requests] + \
-                               [friend_request.sender for friend_request in current_user_friend_requests.received_friend_requests]:
-        return True
-    return False
+    if current_user_friend_requests is not None:
+        if remote_user_username in [friend_request.receiver for friend_request in current_user_friend_requests.sent_friend_requests] + \
+                                   [friend_request.sender for friend_request in current_user_friend_requests.received_friend_requests]:
+            return True
+        return False
 
 
 async def create_friend_request(db: AsyncSession, current_user: Users, remote_user_username: str):

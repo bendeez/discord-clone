@@ -28,7 +28,7 @@ async def create_dm(friend_request: FriendRequestIn, current_user: Users = Depen
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="There is already a dm")
     dm = await create_new_dm(db=db, current_user=current_user,
                              remote_user_username=friend_request.username)
-    server_manager.add_valid_server_or_dm(usernames=[dm.id, dm.receiver], type="dm_ids", id=dm.id)
+    server_manager.add_valid_server_or_dm(usernames=[dm.sender, dm.receiver], type="dm_ids", id=dm.id)
     notification = {"chat": "notification", "type": "newdm", "sender": dm.sender, "receiver": dm.receiver}
     await server_manager.broadcast_from_route(sender_username=current_user.username, message=notification, db=db)
     return dm
