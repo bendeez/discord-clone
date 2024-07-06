@@ -1,6 +1,9 @@
-from app.schemas.base import UserBase
+from pydantic import BaseModel
 
 
+class UserBase(BaseModel):
+    username: str
+    
 class UserIn(UserBase):
     password: str
 
@@ -14,3 +17,9 @@ class UserCreate(UserIn):
 
 class UserCreated(UserBase):
     email: str
+
+class UserTokenOut(BaseModel):
+    access_token: str
+
+class UserUpdateProfile(BaseModel):
+    profile: str

@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status, WebSocket, WebSocketException
 from app.db.database import get_db
 from app.core.config import settings
-from app.crud.user import check_user_exists,get_user_data
+from app.crud.user import get_user,get_user_data
 from sqlalchemy.ext.asyncio import AsyncSession
 
 SECRET_KEY = settings.JWT_SECRET_KEY
@@ -25,8 +25,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         username = payload.get("username")
         if username is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
-        user = await check_user_exists(db=db,remote_user_username=username)
-        if not user:
+        user = await get_user(db=db,remote_user_username=username)
+        if user is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
         return user
     except JWTError:

@@ -9,7 +9,7 @@ export default function Profile(){
         const file = event.target.files[0]
         const formData = new FormData()
         formData.append("file",file)
-        const url = "/api/profilepicture"
+        const url = `${process.env.REACT_APP_API_BACKEND}/profilepicture`
         const requestOptions = {
               method: 'PUT',
               headers:{"Authorization":"Bearer " + token},

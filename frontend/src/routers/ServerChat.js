@@ -26,7 +26,7 @@ export default function ServerChat({serverName}){
     },[messages])
     useEffect(() => {
         async function getMessages(){
-            const url = "/api/servermessages/" + id
+            const url = `${process.env.REACT_APP_API_BACKEND}/servermessages/` + id
             const requestOptions = {
                   method: 'GET',
                   headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},

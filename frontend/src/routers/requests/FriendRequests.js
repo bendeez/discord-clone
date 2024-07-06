@@ -9,7 +9,7 @@ export default function FriendRequests(){
     const token = localStorage.getItem("token")
     useEffect(() => {
         async function getFriendRequests(){
-            const url = "/api/friendrequests"
+            const url = `${process.env.REACT_APP_API_BACKEND}/friendrequests`
             const requestOptions = {
                 method: 'GET',
                 headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token}
@@ -25,7 +25,7 @@ export default function FriendRequests(){
         getFriendRequests()
     },[])
     async function createDm(user){
-        const url = "/api/dm"
+        const url = `${process.env.REACT_APP_API_BACKEND}/dm`
         const requestOptions = {
             method: 'POST',
             headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},
@@ -35,7 +35,7 @@ export default function FriendRequests(){
         return response
     }
     async function deleteFriendRequest(user){
-        const url = "/api/friendrequest"
+        const url = `${process.env.REACT_APP_API_BACKEND}/friendrequest`
         const requestOptions = {
             method: 'DELETE',
             headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},
@@ -47,7 +47,7 @@ export default function FriendRequests(){
         ))
     }
     async function acceptFriendRequest(user){
-        const url = "/api/friend"
+        const url = `${process.env.REACT_APP_API_BACKEND}/friend`
         const requestOptions = {
             method: 'POST',
             headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},

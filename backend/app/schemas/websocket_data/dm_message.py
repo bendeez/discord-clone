@@ -12,23 +12,23 @@ class DmWebsocketMessageBase(BaseModel):
     date: Optional[datetime] = None
 
 class DmWebsocketText(DmWebsocketMessageBase):
-    chat: Literal['dm']
-    type: Literal["text"]
+    chat: Literal['dm'] = "dm"
+    type: Literal["text"] = "text"
     text: str
 
 class DmWebsocketFile(DmWebsocketMessageBase):
-    chat: Literal['dm']
-    type: Literal["file"]
+    chat: Literal['dm'] = "dm"
+    type: Literal["file"] = "file"
     file: str
     filetype: str
 
 class DmWebsocketTextAndFile(DmWebsocketText,DmWebsocketFile):
-    chat: Literal['dm']
-    type: Literal["textandfile"]
+    chat: Literal['dm'] = "dm"
+    type: Literal["textandfile"] = "textandfile"
 
 class DmWebsocketLink(DmWebsocketMessageBase):
-    chat: Literal['dm']
-    type: Literal["link"]
+    chat: Literal['dm'] = "dm"
+    type: Literal["link"] = "link"
     serverinviteid: int
     servername: str
     serverprofile: str

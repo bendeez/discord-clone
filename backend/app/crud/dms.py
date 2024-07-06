@@ -1,24 +1,30 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, union, case, func, or_, and_
 from sqlalchemy.orm import selectinload
+from app.schemas.websocket_data.notification_message import NotificationNewDm
 from app.models.dms import Dms, Dm_Messages
 from app.models.servers import Server
 from app.models.user import Users
+from app.routers.server_websocket.ServerConnectionManager import server_manager
 
 
 
 async def check_already_created_dm(db: AsyncSession, current_user: Users, remote_user_username: str):
-    current_user_dms = await db.execute(select(Users)
-                                .where(Users.username == current_user.username)
-                                .options(selectinload(Users.sent_dms),
-                                         selectinload(Users.received_dms)))
-    current_user_dms = current_user_dms.scalars().first()
-    if current_user_dms is not None:
-        if remote_user_username in [dm.receiver for dm in current_user_dms.sent_dms] + [dm.sender for dm in current_user_dms.received_dms]:
-            return True
-        return False
+    dm = await get_dm(db=db, current_user=current_user, remote_user_username=remote_user_username)
+    if dm is not None:
+        return True
+    return False
 
-
+async def get_dm(db: AsyncSession, current_user: Users, remote_user_username):
+    dm = await db.execute(
+        select(Dms).filter(
+            or_(
+                and_(Dms.sender == current_user.username, Dms.receiver == remote_user_username),
+                and_(Dms.receiver == current_user.username, Dms.sender == remote_user_username)
+            )
+        )
+    )
+    return dm.scalars().first()
 
 async def check_user_in_dm(db: AsyncSession, current_user: Users, dm_id: int):
     dm = await db.execute(select(Dms)
@@ -99,13 +105,19 @@ async def get_all_dm_messages(db: AsyncSession, dm_id: int):
                                    .order_by(Dm_Messages.id))
     return dm_messages.all()
 
-async def get_dm(db: AsyncSession, current_user: Users, remote_user_username):
-    dm = await db.execute(
-        select(Dms).filter(
-            or_(
-                and_(Dms.sender == current_user.username, Dms.receiver == remote_user_username),
-                and_(Dms.receiver == current_user.username, Dms.sender == remote_user_username)
-            )
-        )
-    )
-    return dm.scalars().first()
+async def delete_current_dm(db: AsyncSession, dm: Dms):
+    await db.delete(dm)
+    await db.commit()
+
+async def delete_current_dm_message(db: AsyncSession, dm_message: Dm_Messages):
+    await db.delete(dm_message)
+    await db.commit()
+
+async def send_new_dm_notification(current_user: Users, dm: Dms):
+    """
+        add the dm id to the users' dm_ids list so they can
+        send messages in that dm
+    """
+    server_manager.add_valid_server_or_dm(usernames=[dm.sender, dm.receiver], type="dm_ids", id=dm.id)
+    create_dm_notification = NotificationNewDm(**{"sender": dm.sender, "receiver": dm.receiver})
+    await server_manager.broadcast_from_route(sender_username=current_user.username, message=create_dm_notification)

@@ -18,7 +18,7 @@ export default function Server(){
 
     useEffect(() => {
         async function getServerInformation(){
-            const url = "/api/server/" + id
+            const url = `${process.env.REACT_APP_API_BACKEND}/server/` + id
             const requestOptions = {
                   method: 'GET',
                   headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},

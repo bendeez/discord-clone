@@ -19,7 +19,7 @@ export default function ContextProvider(props){
     const navigate = useNavigate()
     const token = localStorage.getItem("token")
     async function getUserInformation(){
-            let url = "/api/usercredentials"
+            let url = `${process.env.REACT_APP_API_BACKEND}/usercredentials`
             let requestOptions = {
                   method: 'GET',
                   headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},
@@ -37,7 +37,7 @@ export default function ContextProvider(props){
         setRequest(newRequest)
     }
     async function getDms(){
-            const url = "/api/dms"
+            const url = `${process.env.REACT_APP_API_BACKEND}/dms`
             const requestOptions = {
                   method: 'GET',
                   headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},
@@ -75,7 +75,7 @@ export default function ContextProvider(props){
         }
     }
     async function getAllFriends(){
-            const url = "/api/friends"
+            const url = `${process.env.REACT_APP_API_BACKEND}/friends`
                     let requestOptions = {
                         method: 'GET',
                         headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token}
@@ -106,7 +106,7 @@ export default function ContextProvider(props){
    }
    async function deleteFriend(event,user){
         event.stopPropagation()
-        const url = "/api/friend"
+        const url = `${process.env.REACT_APP_API_BACKEND}/friend`
         const requestOptions = {
             method: 'DELETE',
             headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},
@@ -137,7 +137,7 @@ export default function ContextProvider(props){
         setCreateServerFile(null)
     }
     async function getServers(){
-            const url = "/api/servers"
+            const url = `${process.env.REACT_APP_API_BACKEND}/servers`
             const requestOptions = {
                   method: 'GET',
                   headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},
@@ -154,7 +154,7 @@ export default function ContextProvider(props){
         setShowInviteUsers(ShowInviteUsers => !ShowInviteUsers)
     }
     async function getServerUsers(id){
-            const url = "/api/server/users/" + id
+            const url = `${process.env.REACT_APP_API_BACKEND}/server/users/` + id
             const requestOptions = {
                   method: 'GET',
                   headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},

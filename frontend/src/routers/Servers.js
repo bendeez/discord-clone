@@ -12,7 +12,7 @@ export default function Servers(){
     const navigate = useNavigate()
     useEffect(() => {
         async function getNotifications(){
-            const url = "/api/notifications"
+            const url = `${process.env.REACT_APP_API_BACKEND}/notifications`
             const requestOptions = {
                   method: 'GET',
                   headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},
@@ -57,7 +57,7 @@ export default function Servers(){
     },[serverWebsocket])
     async function deleteNotification(dmId){
         navigate("/dm/" + dmId)
-        const url = "/api/notification"
+        const url = `${process.env.REACT_APP_API_BACKEND}/notification`
         const requestOptions = {
               method: 'DELETE',
               headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},

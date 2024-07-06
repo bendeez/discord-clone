@@ -1,5 +1,5 @@
 from app.schemas.user import UserOut
-from app.schemas.base import Messages
+from app.schemas.messages import Messages
 from pydantic import BaseModel
 from typing import Optional
 
@@ -14,7 +14,7 @@ class ServerUserCreated(BaseModel):
 
 class ServerIn(BaseModel):
     name: str
-    profile: Optional[str] = None
+    profile: Optional[str] = None #base64
 
 class ServerCreated(BaseModel):
     id: int

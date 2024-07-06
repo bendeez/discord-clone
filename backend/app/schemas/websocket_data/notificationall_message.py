@@ -5,8 +5,8 @@ class NotificationAllMessageBase(BaseModel):
     username: Optional[str] = None
 
 class NotificationAllStatus(NotificationAllMessageBase):
-    chat: Literal['notificationall']
-    type: Literal["status"]
+    chat: Literal['notificationall'] = "notificationall"
+    type: Literal["status"] = "status"
     status: str
 
 NotificationAll = Annotated[Union[NotificationAllStatus],Field(...,discriminator='type')]

@@ -8,7 +8,7 @@ export default function AddFriend(){
     const token = localStorage.getItem("token")
     async function sendFriendRequest(event){
         event.preventDefault()
-        const url = "/api/friendrequest"
+        const url = `${process.env.REACT_APP_API_BACKEND}/friendrequest`
         const requestOptions = {
             method: 'POST',
             headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},

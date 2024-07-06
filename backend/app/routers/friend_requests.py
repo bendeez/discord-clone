@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.friend_requests import FriendRequestIn, FriendRequestOut, FriendRequestCreated
 from app.db.database import get_db
 from app.crud.friend_requests import check_friend_request, create_friend_request, get_all_friend_requests, \
-                                     get_friend_request
+                                     get_friend_request, delete_current_friend_request
 from app.crud.friends import check_already_friends
 from app.crud.user import check_user_exists
 from app.models.user import Users
@@ -45,6 +45,5 @@ async def delete_friend_request(friend_request: FriendRequestIn, current_user: U
     current_friend_request = await get_friend_request(db=db, current_user=current_user,
                                                 remote_user_username=friend_request.username)
     if current_friend_request is None:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Friend request already deleted")
-    await db.delete(current_friend_request)
-    await db.commit()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Friend request does not exist")
+    await delete_current_friend_request(db=db,friend_request=current_friend_request)

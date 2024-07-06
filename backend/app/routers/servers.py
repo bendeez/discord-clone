@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.servers import UserServer, ServersOut, ServerUserOut, ServerMessagesOut, \
                                 ServerUserCreated, ServerCreated
-from app.routers.server_websocket.ServerConnectionManager import server_manager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.servers import ServerIn
 from app.db.database import get_db
 from app.core.oauth import get_current_user
 from app.models.user import Users
 from app.crud.servers import create_new_server, get_all_servers, check_user_in_server, get_server_by_id, \
-    get_all_server_users, add_user_to_server, get_all_server_messages
-from datetime import datetime
+    get_all_server_users, add_user_to_server, get_all_server_messages, send_create_server_message, send_join_server_message
 from typing import List
 from app.redis.redis_client import redis_client
 
@@ -21,11 +19,7 @@ router = APIRouter()
 async def create_server(server: ServerIn, current_user: Users = Depends(get_current_user),
                         db: AsyncSession = Depends(get_db)):
     new_server = await create_new_server(db=db, server=server, current_user=current_user)
-    server_manager.add_valid_server_or_dm(usernames=[new_server.owner], type="server_ids", id=new_server.id)
-    created_message = {"chat": "server", "server": new_server.id, "type": "announcement",
-                       "announcement": f"{new_server.owner} has created the server", "username": new_server.owner,
-                       "date": datetime.now().isoformat()}
-    await server_manager.broadcast_from_route(sender_username=current_user.username, message=created_message, db=db)
+    await send_create_server_message(current_user=current_user, new_server=new_server)
     return new_server
 
 
@@ -67,11 +61,7 @@ async def join_server(user_server: UserServer, current_user: Users = Depends(get
     if in_server:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You have already joined the server")
     server_user = await add_user_to_server(db=db, server_id=server_id, current_user=current_user)
-    join_message = {"chat": "server", "server": server_user.server_id, "type": "announcement",
-                    "announcement": f"{current_user.username} has joined the server", "username": server_user.username,
-                    "date": datetime.now().isoformat()}
-    server_manager.add_valid_server_or_dm(server_user.username, "server_ids", server_user.server_id)
-    await server_manager.broadcast_from_route(sender_username=current_user.username, message=join_message, db=db)
+    await send_join_server_message(current_user=current_user,server_user=server_user)
     return server_user
 
 

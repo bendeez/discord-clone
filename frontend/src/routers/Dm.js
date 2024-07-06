@@ -30,7 +30,7 @@ export default function Dm(){
     },[messages])
     useEffect(() => {
         async function getDmInformation(){
-            const url = "/api/dm/" + id
+            const url = `${process.env.REACT_APP_API_BACKEND}/dm/` + id
             const requestOptions = {
                   method: 'GET',
                   headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},
@@ -50,7 +50,7 @@ export default function Dm(){
             }
         }
         async function getMessages(){
-            const url = "/api/dmmessages/" + id
+            const url = `${process.env.REACT_APP_API_BACKEND}/dmmessages/` + id
             const requestOptions = {
                   method: 'GET',
                   headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},
@@ -165,7 +165,7 @@ export default function Dm(){
         }
     }
     async function joinServer(link){
-        const url = "/api/server/user"
+        const url = `${process.env.REACT_APP_API_BACKEND}/server/user`
         const requestOptions = {
               method: 'POST',
               headers:{'Content-Type': 'application/json',"Authorization":"Bearer " + token},

@@ -10,23 +10,23 @@ class ServerWebsocketMessageBase(BaseModel):
     date: Optional[datetime] = None
 
 class ServerWebsocketText(ServerWebsocketMessageBase):
-    chat: Literal['server']
-    type: Literal["text"]
+    chat: Literal['server'] = "server"
+    type: Literal["text"] = "text"
     text: str
 
 class ServerWebsocketFile(ServerWebsocketMessageBase):
-    chat: Literal['server']
-    type: Literal["file"]
+    chat: Literal['server'] = "server"
+    type: Literal["file"] = "file"
     file: str
     filetype: str
 
 class ServerWebsocketTextAndFile(ServerWebsocketText,ServerWebsocketFile):
-    chat: Literal['server']
-    type: Literal["textandfile"]
+    chat: Literal['server'] = "server"
+    type: Literal["textandfile"] = "textandfile"
 
 class ServerWebsocketAnnouncement(ServerWebsocketMessageBase):
-    chat: Literal['server']
-    type: Literal["announcement"]
+    chat: Literal['server'] = "server"
+    type: Literal["announcement"] = "announcement"
     announcement: str
 
 

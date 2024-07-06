@@ -1,22 +1,26 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, and_
-from sqlalchemy.orm import aliased, selectinload
+from sqlalchemy.orm import aliased
 from app.models.friend_requests import FriendRequests
 from app.models.user import Users
 
 
 async def check_friend_request(db: AsyncSession, current_user: Users, remote_user_username: str):
-    current_user_friend_requests = await db.execute(select(Users)
-                                .where(Users.username == current_user.username)
-                                .options(selectinload(Users.sent_friend_requests),
-                                         selectinload(Users.received_friend_requests)))
-    current_user_friend_requests = current_user_friend_requests.scalars().first()
-    if current_user_friend_requests is not None:
-        if remote_user_username in [friend_request.receiver for friend_request in current_user_friend_requests.sent_friend_requests] + \
-                                   [friend_request.sender for friend_request in current_user_friend_requests.received_friend_requests]:
-            return True
-        return False
+    friend_request = await get_friend_request(db=db,current_user=current_user,remote_user_username=remote_user_username)
+    if friend_request is not None:
+        return True
+    return False
 
+async def get_friend_request(db: AsyncSession,current_user: Users,remote_user_username:str):
+    friend_request = await db.execute(
+        select(FriendRequests).filter(
+            or_(
+                and_(FriendRequests.sender == remote_user_username, FriendRequests.receiver == current_user.username),
+                and_(FriendRequests.receiver == remote_user_username, FriendRequests.sender == current_user.username)
+            )
+        )
+    )
+    return friend_request.scalars().first()
 
 async def create_friend_request(db: AsyncSession, current_user: Users, remote_user_username: str):
     request = FriendRequests(sender=current_user.username, receiver=remote_user_username)
@@ -42,13 +46,7 @@ async def get_all_friend_requests(db: AsyncSession, current_user: Users):
                                         )
     return friend_requests.all()
 
-async def get_friend_request(db: AsyncSession,current_user: Users,remote_user_username:str):
-    friend_request = await db.execute(
-        select(FriendRequests).filter(
-            or_(
-                and_(FriendRequests.sender == remote_user_username, FriendRequests.receiver == current_user.username),
-                and_(FriendRequests.receiver == remote_user_username, FriendRequests.sender == current_user.username)
-            )
-        )
-    )
-    return friend_request.scalars().first()
+async def delete_current_friend_request(db: AsyncSession, friend_request: FriendRequests):
+    await db.delete(friend_request)
+    await db.commit()
+

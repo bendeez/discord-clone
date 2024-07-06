@@ -13,9 +13,9 @@ async def server(token: str, websocket: WebSocket, current_user: dict = Depends(
     try:
         while True:
             data = await websocket.receive_json()
-            await server_manager.broadcast(websocket, data, current_user)
+            await server_manager.broadcast(data, current_user)
     except WebSocketDisconnect:
-        await server_manager.disconnect(websocket, current_user,db)
+        await server_manager.disconnect(current_user,db)
     except Exception as e:
         print(e)
-        await server_manager.disconnect(websocket, current_user,db)
+        await server_manager.disconnect(current_user,db)

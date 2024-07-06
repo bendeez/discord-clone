@@ -14,7 +14,7 @@ export default function Login(){
     }
     async function registerSubmit(event){
         event.preventDefault()
-        const url = "/api/user"
+        const url = `${process.env.REACT_APP_API_BACKEND}/user`
         const requestOptions = {
               method: 'POST',
               headers:{'Content-Type': 'application/json'},

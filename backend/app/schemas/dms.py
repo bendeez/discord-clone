@@ -1,5 +1,5 @@
 from app.schemas.user import UserOut
-from app.schemas.base import Messages
+from app.schemas.messages import Messages
 from typing import Optional
 from pydantic import BaseModel, Field, AliasPath
 

@@ -19,7 +19,8 @@ export default function Home(){
 
     useEffect(() => {
         if(username){
-            const websocket = new WebSocket(`ws://127.0.0.1:3000/ws/server/${token}`)
+            const websocket = new WebSocket(`ws://${process.env.REACT_APP_API_BACKEND_WEBSOCKET}/ws/server/${token}`)
+            console.log(`ws://${process.env.REACT_APP_API_BACKEND_WEBSOCKET}/ws/server/${token}`)
             websocket.onopen = () => {
                 websocket.send(JSON.stringify({"chat":"notificationall","type":"status","status":"online","username":username}))
                 window.addEventListener("unload",function () {

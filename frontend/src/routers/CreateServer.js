@@ -7,7 +7,7 @@ export default function CreateServer(){
     const token = localStorage.getItem("token")
     async function serverSubmit(event){
         event.preventDefault()
-        const url = "/api/server"
+        const url = `${process.env.REACT_APP_API_BACKEND}/server`
         const requestBody = createServerFile ? {"name":createServerName,"profile":createServerFile} : {"name":createServerName}
         console.log(requestBody)
         const requestOptions = {
