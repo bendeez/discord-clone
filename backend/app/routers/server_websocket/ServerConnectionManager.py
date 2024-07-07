@@ -9,6 +9,7 @@ from datetime import datetime
 from app.firebase.firebase_startup import firebase_storage
 import uuid
 import asyncio
+from anyio import create_task_group
 from uuid import uuid4
 import base64
 
@@ -69,20 +70,20 @@ class ServerConnectionManager:
         data.date = datetime.now()
 
     async def broadcast_dm(self, data: WebsocketData, current_user: dict):
-        if data.type == "file" or data.type == "textandfile":
-            await self.save_file(data)
-        if data.type == "link":
-            data.link = str(uuid4())
-        self.update_dm_message(data=data,current_user=current_user)
-        dm = data.dm  # get the dm id
-        if dm in current_user["dm_ids"]:  # checks if the dm id is a part of the user's dms
+        if data.dm in current_user["dm_ids"]:  # checks if the dm id is a part of the user's dms
+            if data.type == "file" or data.type == "textandfile":
+                await self.save_file(data)
+            if data.type == "link":
+                data.link = str(uuid4())
+            self.update_dm_message(data=data, current_user=current_user)
             data_dict = data.model_dump()
             data_dict["date"] = str(data_dict["date"])
-            for connection in self.active_connections:  # loops through all connections
-                if dm in connection["dm_ids"]:  # checks if the dm id is a part of the remote user's dms
-                    asyncio.create_task(connection["websocket"].send_json(data=data_dict))  # sends a message if it is
-            asyncio.create_task(save_message(data=data))
-            asyncio.create_task(send_notification(data=data, current_user=current_user))
+            async with create_task_group() as task:
+                for connection in self.active_connections:  # loops through all connections
+                    if data.dm in connection["dm_ids"]:  # checks if the dm id is a part of the remote user's dms
+                        task.start_soon(connection["websocket"].send_json,data_dict) # sends a message if it is
+                task.start_soon(save_message,data)
+                task.start_soon(send_notification,data,current_user)
 
     def update_server_message(self, data: WebsocketData, current_user: dict):
         data.username = current_user["username"]
@@ -90,17 +91,17 @@ class ServerConnectionManager:
         data.date = datetime.now()
 
     async def broadcast_server(self, data: WebsocketData, current_user: dict):
-        if data.type == "file" or data.type == "textandfile":
-            await self.save_file(data)
-        self.update_server_message(data=data,current_user=current_user)
-        server = data.server
-        if server in current_user["server_ids"]:
+        if data.server in current_user["server_ids"]:
+            if data.type == "file" or data.type == "textandfile":
+                await self.save_file(data)
+            self.update_server_message(data=data, current_user=current_user)
             data_dict = data.model_dump()
             data_dict["date"] = str(data_dict["date"])
-            for connection in self.active_connections:
-                if server in connection["server_ids"]:
-                    asyncio.create_task(connection["websocket"].send_json(data=data_dict))
-            asyncio.create_task(save_message(data=data))
+            async with create_task_group() as task:
+                for connection in self.active_connections:
+                    if data.server in connection["server_ids"]:
+                        task.start_soon(connection["websocket"].send_json,data_dict)
+                task.start_soon(save_message,data)
 
     def update_notification(self, data: WebsocketData, current_user: dict):
         data.sender = current_user["username"]
@@ -108,19 +109,21 @@ class ServerConnectionManager:
 
     async def broadcast_notification(self, data: WebsocketData, current_user: dict):
         self.update_notification(data=data,current_user=current_user)
-        for connection in self.active_connections:
-            if data.receiver == connection["username"]:
-                asyncio.create_task(connection["websocket"].send_json(data=data.model_dump()))
-        asyncio.create_task(save_message(data=data))
+        async with create_task_group() as task:
+            for connection in self.active_connections:
+                if data.receiver == connection["username"]:
+                    task.start_soon(connection["websocket"].send_json,data.model_dump())
+            task.start_soon(save_message,data)
 
     def update_notification_all(self, data: WebsocketData, current_user: dict):
         data.username = current_user["username"]
 
     async def broadcast_notification_all(self, data: WebsocketData, current_user: dict):
         self.update_notification_all(data=data, current_user=current_user)
-        for connection in self.active_connections:
-            asyncio.create_task(connection["websocket"].send_json(data.model_dump()))
-        asyncio.create_task(save_message(data=data))
+        async with create_task_group() as task:
+            for connection in self.active_connections:
+                task.start_soon(connection["websocket"].send_json,data.model_dump())
+            task.start_soon(save_message,data)
 
 
     def add_valid_server_or_dm(self, usernames: list, type: str, id: str):

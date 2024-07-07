@@ -1,4 +1,3 @@
-import asyncio
 from app.models.notifications import Notifications
 from app.models.servers import Server_Messages
 from app.models.dms import Dm_Messages
@@ -20,7 +19,7 @@ async def set_user_status(db:AsyncSession,status:str,current_user:dict):
 
 async def send_notification(data: WebsocketData, current_user: dict):
     notification = NotificationMessage(**{"dm": data.dm,"sender": data.username, "receiver": data.otheruser,"profile": data.profile})
-    asyncio.create_task(ServerConnectionManager.server_manager.broadcast(data=notification, current_user=current_user))
+    await ServerConnectionManager.server_manager.broadcast(data=notification, current_user=current_user)
 
 async def save_message(data: WebsocketData, db: Optional[AsyncSession] = None):
     async with SessionLocal(expire_on_commit=False) as db:
