@@ -40,6 +40,7 @@ async def test_delete_notfication(http_request,current_user,current_user_token,w
                                   token=current_user_token)
     assert response.status_code == 204
     notification = await get_notification_by_dm_id(db=db,notification_dm_id=dm.id)
+    assert notification is None
 
 
 
