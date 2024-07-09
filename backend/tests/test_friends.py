@@ -1,5 +1,5 @@
 from app.crud.friend_requests import create_friend_request
-from app.crud.friends import create_friend
+from app.crud.friends import create_friend, get_friend
 from utils import RequestMethod
 
 
@@ -60,6 +60,8 @@ async def test_delete_friend(http_request,current_user,current_user_token,remote
                                   json={"username":remote_user.username},
                                   token=current_user_token)
     assert response.status_code == 204
+    friend = await get_friend(db=db,current_user=current_user,remote_user_username=remote_user.username)
+    assert friend is None
 
 async def test_invalid_delete_friend(http_request,current_user_token,remote_user):
     remote_user, _ = await remote_user()

@@ -1,5 +1,6 @@
 from app.crud.dms import create_new_dm
 from app.crud.server_websocket import save_message
+from app.crud.notifications import get_notification_by_dm_id
 from app.schemas.websocket_data.notification_message import NotificationMessage
 from app.schemas.websocket_data.dm_message import DmWebsocketText
 from app.routers.server_websocket.ServerConnectionManager import server_manager
@@ -38,6 +39,7 @@ async def test_delete_notfication(http_request,current_user,current_user_token,w
                                   json={"id":dm.id},
                                   token=current_user_token)
     assert response.status_code == 204
+    notification = await get_notification_by_dm_id(db=db,notification_dm_id=dm.id)
 
 
 

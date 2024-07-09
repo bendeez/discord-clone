@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from app.schemas.notifications import NotificationIn, NotificationOut
 from app.db.database import get_db
 from app.core.oauth import get_current_user
-from app.crud.notifications import get_all_notifications, get_notification_by_id, delete_current_notification
+from app.crud.notifications import get_all_notifications, get_notification_by_dm__id, delete_current_notification
 from app.models.user import Users
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
@@ -25,7 +25,7 @@ async def delete_notification(notification: NotificationIn, current_user: Users 
     """
         only dm message notifications
     """
-    notification = await get_notification_by_id(db=db, notification_id=notification.id)
+    notification = await get_notification_by_dm_id(db=db, notification_dm_id=notification.id)
     if notification is None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Notification doesn't exist")
     await delete_current_notification(db=db, notification=notification)

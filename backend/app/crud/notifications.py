@@ -17,8 +17,8 @@ async def get_all_notifications(db: AsyncSession, current_user: Users):
     return notifications.all()
 
 
-async def get_notification_by_id(db: AsyncSession, notification_id: int):
-    notification = await db.execute(select(Notifications).where(Notifications.dm == notification_id))
+async def get_notification_by_dm_id(db: AsyncSession, notification_dm_id: int):
+    notification = await db.execute(select(Notifications).where(Notifications.dm == notification_dm_id))
     return notification.scalars().first()
 
 async def delete_current_notification(db: AsyncSession, notification: Notifications):

@@ -1,4 +1,5 @@
 from utils import RequestMethod
+from app.core.oauth import get_current_user
 
 
 async def test_login(http_request,current_user):
@@ -7,7 +8,8 @@ async def test_login(http_request,current_user):
                                   json={"username":current_user.username,"password":current_user.password})
     assert response.status_code == 200
     data = response.json()
-    assert data["access_token"] is not None
+    user = await get_current_user(data["access_token"])
+    assert user == current_user
 
 async def test_invalid_login(http_request,current_user):
     response = await http_request(path="/login",
