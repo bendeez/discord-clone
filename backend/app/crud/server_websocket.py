@@ -1,7 +1,7 @@
 from app.models.notifications import Notifications
 from app.models.servers import Server_Messages
 from app.models.dms import Dm_Messages
-from app.schemas.websocket_data.websocket_data import WebsocketData, websocket_data_adaptor
+from app.schemas.websocket_data.websocket_data import WebsocketData
 from app.schemas.websocket_data.notification_message import NotificationMessage
 from app.db.database import SessionLocal
 from sqlalchemy import select, and_
@@ -9,6 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import app.routers.server_websocket.ServerConnectionManager as ServerConnectionManager
 from app.redis.redis_client import redis_client
 from typing import Optional
+from app.firebase.firebase_startup import firebase_storage
+import uuid
+import asyncio
+import base64
 
 
 async def set_user_status(db:AsyncSession,status:str,current_user:dict):
@@ -54,3 +58,14 @@ async def save_notification(data: WebsocketData,db: AsyncSession):
         notification = Notifications.save_notification(data.model_dump())
         db.add(notification)
         return notification
+
+async def save_file(data: WebsocketData):
+    file_type = data.filetype
+    filename = f"{uuid.uuid4()}.{file_type}"
+    if "," in data.file:
+        file = data.file.split(",")[1]
+    else:
+        file = data.file
+    encoded_file = base64.b64decode(file)
+    await asyncio.to_thread(firebase_storage.child(filename).put, encoded_file)
+    data.file = f"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8"

@@ -9,6 +9,15 @@ class ServerWebsocketMessageBase(BaseModel):
     profile: Optional[str] = None
     date: Optional[datetime] = None
 
+    def make_json_compatible(self):
+        """
+            returns json version copy
+            with compatible types
+        """
+        model_copy = self.copy()
+        model_copy.date = str(model_copy.date)
+        return model_copy.model_dump()
+
 class ServerWebsocketText(ServerWebsocketMessageBase):
     chat: Literal['server'] = "server"
     type: Literal["text"] = "text"

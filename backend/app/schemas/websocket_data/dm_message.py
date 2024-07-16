@@ -11,6 +11,15 @@ class DmWebsocketMessageBase(BaseModel):
     profile: Optional[str] = None
     date: Optional[datetime] = None
 
+    def make_json_compatible(self):
+        """
+            returns json version copy
+            with compatible types
+        """
+        model_copy = self.copy()
+        model_copy.date = str(model_copy.date)
+        return model_copy.model_dump()
+
 class DmWebsocketText(DmWebsocketMessageBase):
     chat: Literal['dm'] = "dm"
     type: Literal["text"] = "text"
