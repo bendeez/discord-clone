@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fbb3eb7a-d855-4cfe-98dc-aead60164257" name="Changes" comment="" />
+    <list default="true" id="fbb3eb7a-d855-4cfe-98dc-aead60164257" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/routers/server_websocket/ServerConnectionManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/server_websocket/ServerConnectionManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/requirements.txt" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,7 +37,6 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/User/PycharmProjects/pythonProject/pythonProject86&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PythonContentEntriesConfigurable&quot;
   }
@@ -51,11 +55,11 @@
       <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\app" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend" />
       <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\frontend" />
       <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend\app\core" />
       <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend\app" />
       <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86" />
-      <recent name="C:\Users\User\PycharmProjects\pythonProject\pythonProject86\backend\app\schemas\websocket_data" />
     </key>
   </component>
   <component name="RunManager" selected="Python.dms">

@@ -35,18 +35,15 @@ class ServerConnectionManager:
 
     async def broadcast(self, data: Union[dict,WebsocketData], current_user: dict):
         data = websocket_data_adaptor.validate_python(data)
-        try:
-            chat = data.chat
-            if chat == "dm": # checks if the message is being sent to a dm
-                await self.broadcast_dm(data=data,current_user=current_user)
-            elif chat == "server":
-                await self.broadcast_server(data=data,current_user=current_user)
-            elif chat == "notification":
-                await self.broadcast_notification(data=data,current_user=current_user)
-            elif chat == "notificationall":
-                await self.broadcast_notification_all(data=data,current_user=current_user)
-        except Exception as e:
-            print(e)
+        chat = data.chat
+        if chat == "dm": # checks if the message is being sent to a dm
+            await self.broadcast_dm(data=data,current_user=current_user)
+        elif chat == "server":
+            await self.broadcast_server(data=data,current_user=current_user)
+        elif chat == "notification":
+            await self.broadcast_notification(data=data,current_user=current_user)
+        elif chat == "notificationall":
+            await self.broadcast_notification_all(data=data,current_user=current_user)
 
     async def broadcast_dm(self, data: WebsocketData, current_user: dict):
         if data.dm in current_user["dm_ids"]:  # checks if the dm id is a part of the user's dms
