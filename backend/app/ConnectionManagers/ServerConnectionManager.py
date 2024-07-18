@@ -4,18 +4,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.server_websocket import save_message, send_notification, set_user_status, save_file
 from app.schemas.websocket_data.websocket_data import WebsocketData,websocket_data_adaptor
 from app.schemas.websocket_data.notificationall_message import NotificationAllStatus
+from app.ConnectionManagers.RedisPubSubManager import RedisPubSubManager
+from app.core.config import Settings
 from datetime import datetime
 from anyio import create_task_group
 from uuid import uuid4
+from app.redis.redis_client import redis_client
+import asyncio
 
 
 class ServerConnectionManager:
     def __init__(self):
         self.active_connections: list[dict[str, Union[list[int], str, WebSocket]]] = []
+        self.pubsub_client = RedisPubSubManager(host=Settings.REDIS_HOST,port=Settings.REDIS_PORT,
+                                                global_redis_client=redis_client)
 
     async def connect(self, websocket: WebSocket, current_user: dict,db: AsyncSession):
         await websocket.accept()
-        self.active_connections.append(current_user)
+        self.pubsub_client.connect()
+        channels = {key:value for key, value in current_user.items() if key in ["server_ids", "dm_ids", "username"]}
+        await self.pubsub_client.subscribe(channels=channels)
         await set_user_status(db=db, status="online", current_user=current_user)
         await self.broadcast(data=NotificationAllStatus(**{"status": "online", "username": current_user["username"]}),
                              current_user=current_user)

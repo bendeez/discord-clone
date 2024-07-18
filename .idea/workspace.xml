@@ -5,13 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fbb3eb7a-d855-4cfe-98dc-aead60164257" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/dbnavigator.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/pythonProject86.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/crud/server_websocket.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/crud/server_websocket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/redis/redis_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/redis/redis_client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app/routers/servers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/routers/servers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/backend/poetry.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/tests/test_servers.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/tests/test_servers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/ConnectionManagers/RedisPubSubManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/ConnectionManagers/RedisPubSubManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/ConnectionManagers/ServerConnectionManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/ConnectionManagers/ServerConnectionManager.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
