@@ -53,7 +53,7 @@ async def get_server_users(server_id: int, current_user: Users = Depends(get_cur
 @router.post("/server/user", status_code=status.HTTP_201_CREATED, response_model=ServerUserCreated)
 async def join_server(user_server: UserServer, current_user: Users = Depends(get_current_user),
                       db: AsyncSession = Depends(get_db)):
-    server_id = redis_client.get(user_server.link)
+    server_id = await redis_client.get(user_server.link)
     if server_id is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invite link is invalid")
     server_id = int(server_id)

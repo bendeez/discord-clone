@@ -79,7 +79,7 @@ async def test_join_server(http_request,current_user,current_user_token,remote_u
     current_ws, _ = await websocket_connection(token=current_user_token)
     await websocket_connection(token=remote_token) # to send the join server message (application does that)
     link = str(uuid4())
-    redis_client.set(link,server.id)
+    await redis_client.set(link,server.id)
     response = await http_request("/server/user", method=RequestMethod.POST,
                                   json={"link":link}, token=remote_token)
     assert response.status_code == 201

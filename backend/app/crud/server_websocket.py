@@ -31,7 +31,7 @@ async def save_message(data: WebsocketData, db: Optional[AsyncSession] = None):
         if data.chat == "dm":
             message = Dm_Messages.save_dm_message(data.model_dump())
             if data.type == "link":
-                redis_client.set(data.link, data.serverinviteid)
+                await redis_client.set(data.link, data.serverinviteid)
             db.add(message)
         elif data.chat == "server":
             message = Server_Messages.save_server_message(data.model_dump())
