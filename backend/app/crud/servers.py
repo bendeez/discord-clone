@@ -9,7 +9,7 @@ from app.schemas.websocket_data.server_message import ServerWebsocketAnnouncemen
 import uuid
 import base64
 import asyncio
-from app.routers.server_websocket.ServerConnectionManager import server_manager
+from app.ConnectionManagers.ServerConnectionManager import server_manager
 
 async def upload_server_profile(server: ServerIn):
     filename = f"{uuid.uuid4()}.jpg"

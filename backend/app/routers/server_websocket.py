@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
-from app.routers.server_websocket.ServerConnectionManager import server_manager
+from app.ConnectionManagers.ServerConnectionManager import server_manager
 from app.core.oauth import get_websocket_user
 from app.db.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession

@@ -5,7 +5,7 @@ from app.schemas.websocket_data.notification_message import NotificationNewDm
 from app.models.dms import Dms, Dm_Messages
 from app.models.servers import Server
 from app.models.user import Users
-from app.routers.server_websocket.ServerConnectionManager import server_manager
+from app.ConnectionManagers.ServerConnectionManager import server_manager
 
 
 

@@ -6,7 +6,7 @@ from app.schemas.websocket_data.notification_message import NotificationMessage
 from app.db.database import SessionLocal
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-import app.routers.server_websocket.ServerConnectionManager as ServerConnectionManager
+import app.ConnectionManagers.ServerConnectionManager as ServerConnectionManager
 from app.redis.redis_client import redis_client
 from typing import Optional
 from app.firebase.firebase_startup import firebase_storage

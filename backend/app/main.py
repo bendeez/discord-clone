@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import dms, friend_requests, friends, notifications, servers, user
-from app.routers.server_websocket import server_websocket
+from app.routers import dms, friend_requests, friends, notifications, servers, user, server_websocket
 
 app = FastAPI()
 origins = ["*"]

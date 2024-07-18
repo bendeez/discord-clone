@@ -3,7 +3,7 @@ from app.crud.server_websocket import save_message
 from app.crud.notifications import get_notification_by_dm_id
 from app.schemas.websocket_data.notification_message import NotificationMessage
 from app.schemas.websocket_data.dm_message import DmWebsocketText
-from app.routers.server_websocket.ServerConnectionManager import server_manager
+from app.ConnectionManagers.ServerConnectionManager import server_manager
 import asyncio
 from utils import RequestMethod
 
