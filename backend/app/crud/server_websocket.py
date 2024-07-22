@@ -6,7 +6,7 @@ from app.schemas.websocket_data.notification_message import NotificationMessage
 from app.db.database import SessionLocal
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-import app.ConnectionManagers.ServerConnectionManager as ServerConnectionManager
+import app.ConnectionManagers.CentralWebsocketServerInterface as CentralWebsocketServerInterface
 from app.redis.redis_client import redis_client
 from typing import Optional
 from app.firebase.firebase_startup import firebase_storage
@@ -23,7 +23,7 @@ async def set_user_status(db:AsyncSession,status:str,current_user:dict):
 
 async def send_notification(data: WebsocketData, current_user: dict):
     notification = NotificationMessage(**{"dm": data.dm,"sender": data.username, "receiver": data.otheruser,"profile": data.profile})
-    await ServerConnectionManager.server_manager.broadcast(data=notification, current_user=current_user)
+    await CentralWebsocketServerInterface.central_ws_interface.broadcast(data=notification, current_user=current_user)
 
 async def save_message(data: WebsocketData, db: Optional[AsyncSession] = None):
     async with SessionLocal(expire_on_commit=False) as db:
@@ -69,3 +69,4 @@ async def save_file(data: WebsocketData):
     encoded_file = base64.b64decode(file)
     await asyncio.to_thread(firebase_storage.child(filename).put, encoded_file)
     data.file = f"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8"
+

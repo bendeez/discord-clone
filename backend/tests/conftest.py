@@ -6,7 +6,7 @@ from app.db.database import SessionLocal, engine
 from app.db.base import BaseMixin
 from app.crud.user import create_new_user, delete_current_user
 from app.core.oauth import create_access_token, get_websocket_user
-from app.ConnectionManagers.ServerConnectionManager import server_manager
+from app.ConnectionManagers.CentralWebsocketServerInterface import central_ws_interface
 from unittest.mock import AsyncMock
 from uuid import uuid4
 import asyncio

@@ -1,4 +1,5 @@
 import redis.asyncio as aioredis
+from uuid import uuid4
 
 
 class RedisPubSubManager:
@@ -14,6 +15,7 @@ class RedisPubSubManager:
         self.redis_host = host
         self.redis_port = port
         self.pubsub = None
+        self.id = str(uuid4())
 
     async def _get_redis_connection(self) -> aioredis.Redis:
         """
@@ -64,3 +66,4 @@ class RedisPubSubManager:
             room_id (str): Channel or room ID to unsubscribe from.
         """
         await self.pubsub.unsubscribe(channel)
+
