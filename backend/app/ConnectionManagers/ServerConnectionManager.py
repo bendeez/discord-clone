@@ -7,18 +7,15 @@ from app.schemas.websocket_data.notificationall_message import NotificationAllSt
 from datetime import datetime
 from anyio import create_task_group
 from uuid import uuid4
-from SocketClient import SocketClient
 
 
 class ServerConnectionManager:
     def __init__(self):
-        self.websocket_to_socket: dict[WebSocket,SocketClient] = {}
+        self.active_connections: list[dict[str, Union[list[int], str, WebSocket]]] = []
 
-    async def connect(self, websocket: WebSocket, current_user: dict,db: AsyncSession):
+    async def connect(self, websocket: WebSocket, current_user: dict, db: AsyncSession):
         await websocket.accept()
-        socket_client = SocketClient()
-        self.websocket_to_socket[websocket] = socket_client
-        await socket_client.connect()
+        self.active_connections.append(current_user)
         await set_user_status(db=db, status="online", current_user=current_user)
         await self.broadcast(data=NotificationAllStatus(**{"status": "online", "username": current_user["username"]}),
                              current_user=current_user)
@@ -26,13 +23,12 @@ class ServerConnectionManager:
     async def broadcast_from_route(self, sender_username: str, message: dict):
         for connection in self.active_connections:
             if connection["username"] == sender_username:
-                await server_manager.broadcast(data=message,
-                                               current_user=connection)
+                await self.broadcast(data=message,
+                                     current_user=connection)
                 return # avoid broadcasting twice if multiple users (different devices) have same username
 
-    async def disconnect(self, websocket: WebSocket, current_user: dict, db: AsyncSession):
-        socket_client = self.websocket_to_socket[websocket]
-        socket_client.disconnect()
+    async def disconnect(self, current_user: dict,db: AsyncSession):
+        self.active_connections.remove(current_user)
         await set_user_status(db=db, status="offline", current_user=current_user)
         await self.broadcast(data=NotificationAllStatus(**{"status": "offline","username": current_user["username"]}),
                              current_user=current_user)
@@ -115,5 +111,3 @@ class ServerConnectionManager:
             if connection["username"] in usernames:
                 connection[type].append(int(id))
 
-
-server_manager = ServerConnectionManager()
