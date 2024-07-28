@@ -3,7 +3,7 @@ from app.crud.server_websocket import save_message
 from app.crud.notifications import get_notification_by_dm_id
 from app.schemas.websocket_data.notification_message import NotificationMessage
 from app.schemas.websocket_data.dm_message import DmWebsocketText
-from app.ConnectionManagers.ServerConnectionManager import server_manager
+from app.ConnectionManagers.CentralWebsocketServerInterface import central_ws_interface
 import asyncio
 from utils import RequestMethod
 
@@ -12,7 +12,7 @@ async def test_get_notification(http_request,current_user,current_user_token,web
     dm = await create_new_dm(db=db,current_user=current_user,remote_user_username=remote_user.username)
     current_ws,current_ws_user = await websocket_connection(token=current_user_token)
     remote_ws, remote_ws_user = await websocket_connection(token=remote_token)
-    await server_manager.broadcast(data=DmWebsocketText(**{"dm":dm.id,"text":"hi",
+    await central_ws_interface.broadcast(data=DmWebsocketText(**{"dm":dm.id,"text":"hi",
                                   "otheruser":current_user.username}).model_dump(),
                                    current_user=remote_ws_user)
     await current_ws.recv() # status notification

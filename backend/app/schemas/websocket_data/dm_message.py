@@ -10,6 +10,7 @@ class DmWebsocketMessageBase(BaseModel):
     username: Optional[str] = None
     profile: Optional[str] = None
     date: Optional[datetime] = None
+    pubsub_publisher: Optional[str] = None
 
     def make_json_compatible(self):
         """

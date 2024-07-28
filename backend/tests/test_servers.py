@@ -1,6 +1,6 @@
 import asyncio
 from app.schemas.servers import ServerMessagesOut, ServerIn
-from app.schemas.websocket_data.server_message import ServerWebsocketText
+from app.schemas.websocket_data.server_message import ServerWebsocketText, ServerWebsocketAnnouncement
 from app.crud.servers import create_new_server
 from app.crud.server_websocket import save_message
 from app.redis.redis_client import redis_client
@@ -28,12 +28,13 @@ async def test_create_server(http_request,current_user,current_user_token,websoc
                                       json=json, token=current_user_token)
         assert response.status_code == 200
         data = response.json()
-        data[0]["date"] = datetime.strptime(data[0]["date"], "%Y-%m-%dT%H:%M:%S.%f") #to compare with datetime value
+        del data[0]["date"]
         assert data == [ServerMessagesOut(**{"server": server_id,
                          "announcement": f"{current_user.username} has created the server",
                          "username": current_user.username,
                          "profile": current_user.profile,
-                         "date": data[0]["date"]}).model_dump()]
+                          "date":datetime.now()}
+                        ).model_dump(exclude={"date"})]
 
 
 async def test_get_servers(http_request,current_user,current_user_token,db):
@@ -91,11 +92,11 @@ async def test_join_server(http_request,current_user,current_user_token,remote_u
     await current_ws.recv()
     await current_ws.recv()
     data = await current_ws.recv()
-    join_message = {"chat": "server", "type": "announcement", "server": server.id,
-                    "announcement": f"{remote_user.username} has joined the server",
-                    "username": remote_user.username, "profile": remote_user.profile,
-                    "date": data["date"]}
-    assert data == join_message
+    del data["date"]
+    assert data == ServerWebsocketAnnouncement(**{"server": server.id,
+                                                "announcement": f"{remote_user.username} has joined the server",
+                                                "username": remote_user.username, "profile": remote_user.profile,}
+                                               ).model_dump(exclude={"date"})
 
 async def test_invalid_link(http_request,current_user_token):
     response = await http_request("/server/user",
