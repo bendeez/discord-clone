@@ -5,7 +5,7 @@ from app.schemas.websocket_data.notification_message import NotificationNewDm
 from app.models.dms import Dms, Dm_Messages
 from app.models.servers import Server
 from app.models.user import Users
-from app.ConnectionManagers.ServerConnectionManager import server_manager
+from app.ConnectionManagers.CentralWebsocketServerInterface import central_ws_interface
 
 
 
@@ -118,6 +118,6 @@ async def send_new_dm_notification(current_user: Users, dm: Dms):
         add the dm id to the users' dm_ids list so they can
         send messages in that dm
     """
-    server_manager.add_valid_server_or_dm(usernames=[dm.sender, dm.receiver], type="dm_ids", id=dm.id)
+    central_ws_interface.add_valid_server_or_dm(usernames=[dm.sender, dm.receiver], type="dm_ids", id=dm.id)
     create_dm_notification = NotificationNewDm(**{"sender": dm.sender, "receiver": dm.receiver})
-    await server_manager.broadcast_from_route(sender_username=current_user.username, message=create_dm_notification)
+    await central_ws_interface.broadcast_from_route(sender_username=current_user.username, message=create_dm_notification)

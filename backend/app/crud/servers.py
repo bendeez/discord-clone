@@ -9,7 +9,7 @@ from app.schemas.websocket_data.server_message import ServerWebsocketAnnouncemen
 import uuid
 import base64
 import asyncio
-from app.ConnectionManagers.ServerConnectionManager import server_manager
+from app.ConnectionManagers.CentralWebsocketServerInterface import central_ws_interface
 
 async def upload_server_profile(server: ServerIn):
     filename = f"{uuid.uuid4()}.jpg"
@@ -108,10 +108,10 @@ async def send_create_server_message(current_user: Users, new_server: Server):
             add the server id to the users' server_ids list so they can
             send messages in that server
     """
-    server_manager.add_valid_server_or_dm(usernames=[new_server.owner], type="server_ids", id=new_server.id)
+    central_ws_interface.add_valid_server_or_dm(usernames=[new_server.owner], type="server_ids", id=new_server.id)
     create_server_message = ServerWebsocketAnnouncement(**{"server": new_server.id,
                                                          "announcement": f"{new_server.owner} has created the server", "username": new_server.owner})
-    await server_manager.broadcast_from_route(sender_username=current_user.username, message=create_server_message)
+    await central_ws_interface.broadcast_from_route(sender_username=current_user.username, message=create_server_message)
 
 async def send_join_server_message(current_user: Users,server_user: Server_User):
     """
@@ -121,5 +121,5 @@ async def send_join_server_message(current_user: Users,server_user: Server_User)
     join_server_message = ServerWebsocketAnnouncement(**{"server": server_user.server_id,
                            "announcement": f"{current_user.username} has joined the server",
                            "username": server_user.username})
-    server_manager.add_valid_server_or_dm(usernames=[server_user.username],type="server_ids",id=server_user.server_id)
-    await server_manager.broadcast_from_route(sender_username=current_user.username, message=join_server_message)
+    central_ws_interface.add_valid_server_or_dm(usernames=[server_user.username],type="server_ids",id=server_user.server_id)
+    await central_ws_interface.broadcast_from_route(sender_username=current_user.username, message=join_server_message)

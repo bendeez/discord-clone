@@ -4,6 +4,7 @@ from typing import Literal, Union, Annotated, Optional
 class NotificationBase(BaseModel):
     sender: Optional[str] = None
     profile: Optional[str] = None
+    pubsub_publisher: Optional[str] = None
 
 class NotificationMessage(NotificationBase):
     chat: Literal['notification'] = "notification"

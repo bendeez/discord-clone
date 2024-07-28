@@ -13,19 +13,12 @@ class ServerConnectionManager:
     def __init__(self):
         self.active_connections: list[dict[str, Union[list[int], str, WebSocket]]] = []
 
-    async def connect(self, websocket: WebSocket, current_user: dict,db: AsyncSession):
+    async def connect(self, websocket: WebSocket, current_user: dict, db: AsyncSession):
         await websocket.accept()
         self.active_connections.append(current_user)
         await set_user_status(db=db, status="online", current_user=current_user)
         await self.broadcast(data=NotificationAllStatus(**{"status": "online", "username": current_user["username"]}),
                              current_user=current_user)
-
-    async def broadcast_from_route(self, sender_username: str, message: dict):
-        for connection in self.active_connections:
-            if connection["username"] == sender_username:
-                await server_manager.broadcast(data=message,
-                                               current_user=connection)
-                return # avoid broadcasting twice if multiple users (different devices) have same username
 
     async def disconnect(self, current_user: dict,db: AsyncSession):
         self.active_connections.remove(current_user)
@@ -33,7 +26,7 @@ class ServerConnectionManager:
         await self.broadcast(data=NotificationAllStatus(**{"status": "offline","username": current_user["username"]}),
                              current_user=current_user)
 
-    async def broadcast(self, data: Union[dict,WebsocketData], current_user: dict):
+    async def broadcast(self, data: Union[dict, WebsocketData], current_user: dict):
         data = websocket_data_adaptor.validate_python(data)
         chat = data.chat
         if chat == "dm": # checks if the message is being sent to a dm
@@ -58,12 +51,16 @@ class ServerConnectionManager:
                                                           username=current_user["username"],
                                                           profile=current_user["profile"],
                                                           date=datetime.now()))
-            async with create_task_group() as task:
-                for connection in self.active_connections:  # loops through all connections
-                    if data.dm in connection["dm_ids"]:  # checks if the dm id is a part of the remote user's dms
-                        task.start_soon(connection["websocket"].send_json,data.make_json_compatible()) # sends a message if it is
-                task.start_soon(save_message,data)
-                task.start_soon(send_notification,data,current_user)
+            try:
+                async with create_task_group() as task:
+                    for connection in self.active_connections:  # loops through all connections
+                        if data.dm in connection["dm_ids"]:  # checks if the dm id is a part of the remote user's dms
+                            task.start_soon(connection["websocket"].send_json,data.make_json_compatible()) # sends a message if it is
+                    task.start_soon(save_message,data)
+                    task.start_soon(send_notification,data,current_user)
+            except *Exception as excgroup:
+                for e in excgroup.exceptions:
+                    print(e)
 
 
     async def broadcast_server(self, data: WebsocketData, current_user: dict):
@@ -74,30 +71,42 @@ class ServerConnectionManager:
                                                          username=current_user["username"],
                                                          profile=current_user["profile"],
                                                          date=datetime.now()))
-            async with create_task_group() as task:
-                for connection in self.active_connections:
-                    if data.server in connection["server_ids"]:
-                        task.start_soon(connection["websocket"].send_json,data.make_json_compatible())
-                task.start_soon(save_message,data)
+            try:
+                async with create_task_group() as task:
+                    for connection in self.active_connections:
+                        if data.server in connection["server_ids"]:
+                            task.start_soon(connection["websocket"].send_json,data.make_json_compatible())
+                    task.start_soon(save_message,data)
+            except* Exception as excgroup:
+                for e in excgroup.exceptions:
+                    print(e)
 
 
     async def broadcast_notification(self, data: WebsocketData, current_user: dict):
         data = websocket_data_adaptor.validate_python(dict(**data.model_dump(exclude={"sender", "profile"}),
                                                            sender=current_user["username"],
                                                            profile=current_user["profile"]))
-        async with create_task_group() as task:
-            for connection in self.active_connections:
-                if data.receiver == connection["username"]:
-                    task.start_soon(connection["websocket"].send_json,data.model_dump())
-            task.start_soon(save_message,data)
+        try:
+            async with create_task_group() as task:
+                for connection in self.active_connections:
+                    if data.receiver == connection["username"]:
+                        task.start_soon(connection["websocket"].send_json,data.model_dump())
+                task.start_soon(save_message,data)
+        except* Exception as excgroup:
+            for e in excgroup.exceptions:
+                print(e)
 
     async def broadcast_notification_all(self, data: WebsocketData, current_user: dict):
         data = websocket_data_adaptor.validate_python(dict(**data.model_dump(exclude={"username"}),
                                                            username=current_user["username"]))
-        async with create_task_group() as task:
-            for connection in self.active_connections:
-                task.start_soon(connection["websocket"].send_json,data.model_dump())
-            task.start_soon(save_message,data)
+        try:
+            async with create_task_group() as task:
+                for connection in self.active_connections:
+                    task.start_soon(connection["websocket"].send_json,data.model_dump())
+                task.start_soon(save_message,data)
+        except* Exception as excgroup:
+            for e in excgroup.exceptions:
+                print(e)
 
 
     def add_valid_server_or_dm(self, usernames: list, type: str, id: str):
@@ -111,5 +120,3 @@ class ServerConnectionManager:
             if connection["username"] in usernames:
                 connection[type].append(int(id))
 
-
-server_manager = ServerConnectionManager()

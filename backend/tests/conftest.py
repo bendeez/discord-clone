@@ -6,10 +6,14 @@ from app.db.database import SessionLocal, engine
 from app.db.base import BaseMixin
 from app.crud.user import create_new_user, delete_current_user
 from app.core.oauth import create_access_token, get_websocket_user
-from app.ConnectionManagers.ServerConnectionManager import server_manager
+from app.ConnectionManagers.CentralWebsocketServerInterface import central_ws_interface
 from unittest.mock import AsyncMock
 from uuid import uuid4
 import asyncio
+
+@pytest.fixture(autouse=True)
+async def startup():
+    await central_ws_interface.initialize_pubsub()
 
 @pytest.fixture(name="db",scope="session",autouse=True)
 async def create_db_session():
@@ -77,7 +81,7 @@ async def make_http_request(client):
     return _make_http_request
 
 @pytest.fixture()
-async def websocket_connection(db):
+async def websocket_connection(startup, db):
     message_inbox: dict[str,asyncio.Queue] = {}
 
     async def _websocket_connection(token: str):
@@ -95,14 +99,14 @@ async def websocket_connection(db):
         websocket.send_json.side_effect = send_message
         websocket.recv.side_effect = receive_message
 
-        await server_manager.connect(websocket=websocket,current_user=current_user, db=db)
+        await central_ws_interface.connect(websocket=websocket,current_user=current_user, db=db)
 
         return websocket, current_user
 
     yield _websocket_connection
 
-    for connection in server_manager.active_connections:
-        await server_manager.disconnect(current_user=connection,db=db)
+    for connection in central_ws_interface.server_manager.active_connections:
+        await central_ws_interface.disconnect(current_user=connection,db=db)
 
 @pytest.fixture(scope="session",autouse=True)
 def anyio_backend():

@@ -1,4 +1,4 @@
-from jose import jwt, JWTError
+import jwt
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status, WebSocket, WebSocketException
 from app.db.database import get_db
@@ -29,7 +29,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         if user is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
         return user
-    except JWTError:
+    except jwt.PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
 
 
@@ -50,5 +50,5 @@ async def get_websocket_user(websocket: WebSocket, db: AsyncSession = Depends(ge
                           "server_ids": [server.server_id for server in user.server_associations],
                           "dm_ids": [dm.id for dm in user.sent_dms + user.received_dms],"user_model":user}
         return user_data_json
-    except JWTError:
+    except jwt.PyJWTError:
         raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
