@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     DATABASE_HOST: str
     REDIS_HOST: str
     REDIS_PORT: str
+    PUBSUB_COMMUNICATION_CHANNEL: str
 
     model_config = SettingsConfigDict(env_file=f"./app/.env.{ENV}")
 

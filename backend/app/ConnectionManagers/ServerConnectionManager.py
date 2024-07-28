@@ -19,7 +19,7 @@ class ServerConnectionManager:
         self.pubsub_client = RedisPubSubManager(host=Settings.REDIS_HOST,port=Settings.REDIS_PORT,
                                                 global_redis_client=redis_client)
 
-    async def connect(self, websocket: WebSocket, current_user: dict,db: AsyncSession):
+    async def connect(self, websocket: WebSocket, current_user: dict, db: AsyncSession):
         await websocket.accept()
         self.pubsub_client.connect()
         channels = {key:value for key, value in current_user.items() if key in ["server_ids", "dm_ids", "username"]}
@@ -31,8 +31,8 @@ class ServerConnectionManager:
     async def broadcast_from_route(self, sender_username: str, message: dict):
         for connection in self.active_connections:
             if connection["username"] == sender_username:
-                await server_manager.broadcast(data=message,
-                                               current_user=connection)
+                await self.broadcast(data=message,
+                                     current_user=connection)
                 return # avoid broadcasting twice if multiple users (different devices) have same username
 
     async def disconnect(self, current_user: dict,db: AsyncSession):
@@ -119,5 +119,3 @@ class ServerConnectionManager:
             if connection["username"] in usernames:
                 connection[type].append(int(id))
 
-
-server_manager = ServerConnectionManager()
