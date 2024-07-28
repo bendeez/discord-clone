@@ -14,6 +14,7 @@ import asyncio
 @pytest.fixture(autouse=True)
 async def startup():
     await central_ws_interface.initialize_pubsub()
+
 @pytest.fixture(name="db",scope="session",autouse=True)
 async def create_db_session():
     async with SessionLocal() as db:
