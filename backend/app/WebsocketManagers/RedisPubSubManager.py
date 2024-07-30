@@ -25,9 +25,9 @@ class RedisPubSubManager:
         Returns:
             aioredis.Redis: Redis connection object.
         """
-        return aioredis.Redis(host=self.redis_host,
-                              port=self.redis_port,
-                              auto_close_connection_pool=False)
+        return aioredis.Redis(
+            host=self.redis_host, port=self.redis_port, auto_close_connection_pool=False
+        )
 
     def connect(self) -> None:
         """
@@ -67,4 +67,3 @@ class RedisPubSubManager:
             room_id (str): Channel or room ID to unsubscribe from.
         """
         await self.pubsub.unsubscribe(channel)
-

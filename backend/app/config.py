@@ -2,10 +2,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import BaseModel
 import os
 
-if "tests" in os.listdir(os.getcwd()): # backend directory
+if "tests" in os.listdir(os.getcwd()):  # backend directory
     ENV = "test"
 else:
     ENV = "dev"
+
 
 class FirebaseConfig(BaseModel):
     apiKey: str
@@ -16,6 +17,7 @@ class FirebaseConfig(BaseModel):
     messagingSenderId: str
     appId: str
     measurementId: str
+
 
 class Settings(BaseSettings):
     FIREBASE_CONFIG: FirebaseConfig

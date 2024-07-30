@@ -5,8 +5,7 @@ import asyncio
 from app.firebase_startup import firebase_storage
 
 
-class FileUploadService(BaseService):
-
+class FileUploadService:
     async def upload(self, file, file_type):
         filename = f"{uuid4()}.{file_type}"
         if "," in file:

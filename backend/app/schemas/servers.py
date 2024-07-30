@@ -7,20 +7,25 @@ from typing import Optional
 class ServerUserOut(UserOut):
     status: str
 
+
 class ServerUserCreated(BaseModel):
     id: int
     username: str
     server_id: int
 
+
 class ServerIn(BaseModel):
     name: str
-    profile: Optional[str] = None #base64
+    profile: Optional[str] = None  # base64
+
 
 class ServerCreated(BaseModel):
     id: int
     name: str
     profile: Optional[str] = None
     owner: str
+
+
 class ServersOut(BaseModel):
     id: int
     owner: str

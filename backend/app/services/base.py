@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class BaseService:
-
     def __init__(self, transaction: Optional[DatabaseTransactionService] = None):
         if transaction is None:
             transaction = DatabaseTransactionService()
@@ -12,4 +11,3 @@ class BaseService:
     @classmethod
     def get_instance(cls):
         return cls()
-

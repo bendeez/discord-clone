@@ -6,13 +6,19 @@ from typing import Optional
 
 class Friends(BaseMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
-    sender: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
-    receiver: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
+    sender: Mapped[str] = mapped_column(
+        ForeignKey("users.username", ondelete="CASCADE")
+    )
+    receiver: Mapped[str] = mapped_column(
+        ForeignKey("users.username", ondelete="CASCADE")
+    )
     UniqueConstraint(sender, receiver)
 
     sender_user: Mapped["Users"] = relationship(foreign_keys=[sender])
     receiver_user: Mapped["Users"] = relationship(foreign_keys=[receiver])
-    dm_id: Mapped[Optional[int]] = mapped_column(ForeignKey("dms.id",ondelete="CASCADE"))
+    dm_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("dms.id", ondelete="CASCADE")
+    )
     dm: Mapped["Dms"] = relationship(back_populates="friend")
 
     def __repr__(self):

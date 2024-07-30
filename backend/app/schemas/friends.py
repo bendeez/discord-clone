@@ -8,8 +8,10 @@ class FriendsOut(BaseModel):
     profile: str
     dmid: Optional[int] = None
 
+
 class FriendIn(BaseModel):
     username: str
+
 
 class FriendCreated(BaseModel):
     id: int

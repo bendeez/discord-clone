@@ -12,32 +12,44 @@ class ServerWebsocketMessageBase(BaseModel):
 
     def make_json_compatible(self):
         """
-            returns json version copy
-            with compatible types
+        returns json version copy
+        with compatible types
         """
         model_copy = self.copy()
         model_copy.date = str(model_copy.date)
         return model_copy.model_dump()
 
+
 class ServerWebsocketText(ServerWebsocketMessageBase):
-    chat: Literal['server'] = "server"
+    chat: Literal["server"] = "server"
     type: Literal["text"] = "text"
     text: str
 
+
 class ServerWebsocketFile(ServerWebsocketMessageBase):
-    chat: Literal['server'] = "server"
+    chat: Literal["server"] = "server"
     type: Literal["file"] = "file"
     file: str
     filetype: str
 
-class ServerWebsocketTextAndFile(ServerWebsocketText,ServerWebsocketFile):
-    chat: Literal['server'] = "server"
+
+class ServerWebsocketTextAndFile(ServerWebsocketText, ServerWebsocketFile):
+    chat: Literal["server"] = "server"
     type: Literal["textandfile"] = "textandfile"
 
+
 class ServerWebsocketAnnouncement(ServerWebsocketMessageBase):
-    chat: Literal['server'] = "server"
+    chat: Literal["server"] = "server"
     type: Literal["announcement"] = "announcement"
     announcement: str
 
 
-ServerWebsocketMessage = Annotated[Union[ServerWebsocketText,ServerWebsocketFile,ServerWebsocketTextAndFile,ServerWebsocketAnnouncement],Field(...,discriminator='type')]
+ServerWebsocketMessage = Annotated[
+    Union[
+        ServerWebsocketText,
+        ServerWebsocketFile,
+        ServerWebsocketTextAndFile,
+        ServerWebsocketAnnouncement,
+    ],
+    Field(..., discriminator="type"),
+]

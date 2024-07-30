@@ -1,6 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import dms, friend_requests, friends, notifications, servers, user, server_websocket
+from app.routers import (
+    dms,
+    friend_requests,
+    friends,
+    notifications,
+    servers,
+    user,
+    server_websocket,
+)
 from app.WebsocketManagers.CentralWebsocketServerInterface import central_ws_interface
 
 app = FastAPI()
@@ -13,9 +21,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.on_event("startup")
 async def startup_event():
     await central_ws_interface.initialize_pubsub()
+
 
 app.include_router(dms.router)
 app.include_router(friend_requests.router)

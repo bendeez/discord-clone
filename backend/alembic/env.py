@@ -11,7 +11,7 @@ from alembic import context
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option('sqlalchemy.url',SQLALCHEMY_DATABASE_URL)
+config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
@@ -55,10 +55,12 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection,
-                      target_metadata=target_metadata,
-                      compare_type=True,
-                      include_schemas=True)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_type=True,
+        include_schemas=True,
+    )
 
     with context.begin_transaction():
         context.run_migrations()

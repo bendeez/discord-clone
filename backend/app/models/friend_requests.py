@@ -5,8 +5,12 @@ from sqlalchemy import ForeignKey, UniqueConstraint
 
 class FriendRequests(BaseMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
-    sender: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
-    receiver: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
+    sender: Mapped[str] = mapped_column(
+        ForeignKey("users.username", ondelete="CASCADE")
+    )
+    receiver: Mapped[str] = mapped_column(
+        ForeignKey("users.username", ondelete="CASCADE")
+    )
     UniqueConstraint(sender, receiver)
 
     sender_user: Mapped["Users"] = relationship(foreign_keys=[sender])
