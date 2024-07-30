@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile
 from app.schemas.user import UserCreate, UserIn, UserOut, UserCreated, UserUpdateProfile, UserTokenOut
-from app.crud.user import check_user_exists, create_new_user, update_current_profile_picture, get_user
+from app.services.user import check_user_exists, create_new_user, update_current_profile_picture, get_user
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.core.oauth import get_current_user, create_access_token
-from app.core.utils import hash, verify
+from app.utils import verify
 from app.models.user import Users
 
 router = APIRouter()

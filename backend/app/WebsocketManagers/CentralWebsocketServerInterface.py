@@ -1,8 +1,8 @@
 import asyncio
 from fastapi import WebSocket
-from app.ConnectionManagers.RedisPubSubManager import RedisPubSubManager
-from app.ConnectionManagers.ServerConnectionManager import ServerConnectionManager
-from app.core.config import settings
+from app.WebsocketManagers.RedisPubSubManager import RedisPubSubManager
+from app.WebsocketManagers.ServerConnectionManager import ServerConnectionManager
+from app.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.websocket_data.websocket_data import WebsocketData
 from typing import Union

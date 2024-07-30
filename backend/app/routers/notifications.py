@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from app.schemas.notifications import NotificationIn, NotificationOut
 from app.db.database import get_db
 from app.core.oauth import get_current_user
-from app.crud.notifications import get_all_notifications, get_notification_by_dm_id, delete_current_notification
+from app.services.notifications import get_all_notifications, get_notification_by_dm_id, delete_current_notification
 from app.models.user import Users
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List

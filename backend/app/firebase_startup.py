@@ -1,4 +1,4 @@
-from app.core.config import settings
+from app.config import settings
 import firebase
 
 firebase_config = dict(settings.FIREBASE_CONFIG)

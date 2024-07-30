@@ -1,5 +1,5 @@
-from app.crud.friends import create_friend
-from app.crud.friend_requests import create_friend_request, get_friend_request
+from app.services.friends import create_friend
+from app.services.friend_requests import create_friend_request, get_friend_request
 from utils import RequestMethod
 
 async def test_create_friend_request(http_request,current_user,current_user_token,remote_user):

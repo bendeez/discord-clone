@@ -1,9 +1,9 @@
 import asyncio
 from app.schemas.servers import ServerMessagesOut, ServerIn
 from app.schemas.websocket_data.server_message import ServerWebsocketText, ServerWebsocketAnnouncement
-from app.crud.servers import create_new_server
-from app.crud.server_websocket import save_message
-from app.redis.redis_client import redis_client
+from app.services.servers import create_new_server
+from app.services.server_websocket import save_message
+from app.redis_client import redis_client
 from uuid import uuid4
 from utils import RequestMethod
 import base64

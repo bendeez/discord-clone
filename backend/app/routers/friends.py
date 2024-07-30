@@ -3,8 +3,8 @@ from app.schemas.friends import FriendsOut, FriendIn, FriendCreated
 from app.db.database import get_db
 from app.core.oauth import get_current_user
 from app.models.user import Users
-from app.crud.friend_requests import check_friend_request,get_friend_request
-from app.crud.friends import create_friend, get_all_friends, check_already_friends, get_friend, delete_current_friend
+from app.services.friend_requests import check_friend_request,get_friend_request
+from app.services.friends import create_friend, get_all_friends, check_already_friends, get_friend, delete_current_friend
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 

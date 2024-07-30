@@ -5,9 +5,9 @@ from app.db.database import get_db
 from app.core.oauth import get_current_user
 from app.models.user import Users
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.crud.dms import check_already_created_dm, create_new_dm, get_all_dms, check_user_in_dm, get_all_dm_information, \
+from app.services.dms import check_already_created_dm, create_new_dm, get_all_dms, check_user_in_dm, get_all_dm_information, \
     get_all_dm_messages, send_new_dm_notification
-from app.crud.user import check_user_exists
+from app.services.user import check_user_exists
 from typing import List
 
 router = APIRouter()

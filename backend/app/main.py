@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import dms, friend_requests, friends, notifications, servers, user, server_websocket
-from app.ConnectionManagers.CentralWebsocketServerInterface import central_ws_interface
+from app.WebsocketManagers.CentralWebsocketServerInterface import central_ws_interface
 
 app = FastAPI()
 origins = ["*"]

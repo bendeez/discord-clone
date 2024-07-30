@@ -1,5 +1,5 @@
-from app.crud.friend_requests import create_friend_request
-from app.crud.friends import create_friend, get_friend
+from app.services.friend_requests import create_friend_request
+from app.services.friends import create_friend, get_friend
 from utils import RequestMethod
 
 

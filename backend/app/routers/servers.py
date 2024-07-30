@@ -6,10 +6,10 @@ from app.schemas.servers import ServerIn
 from app.db.database import get_db
 from app.core.oauth import get_current_user
 from app.models.user import Users
-from app.crud.servers import create_new_server, get_all_servers, check_user_in_server, get_server_by_id, \
+from app.services.servers import create_new_server, get_all_servers, check_user_in_server, get_server_by_id, \
     get_all_server_users, add_user_to_server, get_all_server_messages, send_create_server_message, send_join_server_message
 from typing import List
-from app.redis.redis_client import redis_client
+from app.redis_client import redis_client
 
 router = APIRouter()
 

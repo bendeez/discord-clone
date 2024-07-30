@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.friend_requests import FriendRequestIn, FriendRequestOut, FriendRequestCreated
 from app.db.database import get_db
-from app.crud.friend_requests import check_friend_request, create_friend_request, get_all_friend_requests, \
+from app.services.friend_requests import check_friend_request, create_friend_request, get_all_friend_requests, \
                                      get_friend_request, delete_current_friend_request
-from app.crud.friends import check_already_friends
-from app.crud.user import check_user_exists
+from app.services.friends import check_already_friends
+from app.services.user import check_user_exists
 from app.models.user import Users
 from app.core.oauth import get_current_user
 from sqlalchemy.ext.asyncio import AsyncSession

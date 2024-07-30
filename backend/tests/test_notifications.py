@@ -1,9 +1,9 @@
-from app.crud.dms import create_new_dm
-from app.crud.server_websocket import save_message
-from app.crud.notifications import get_notification_by_dm_id
+from app.services.dms import create_new_dm
+from app.services.server_websocket import save_message
+from app.services.notifications import get_notification_by_dm_id
 from app.schemas.websocket_data.notification_message import NotificationMessage
 from app.schemas.websocket_data.dm_message import DmWebsocketText
-from app.ConnectionManagers.CentralWebsocketServerInterface import central_ws_interface
+from app.WebsocketManagers.CentralWebsocketServerInterface import central_ws_interface
 import asyncio
 from utils import RequestMethod
 

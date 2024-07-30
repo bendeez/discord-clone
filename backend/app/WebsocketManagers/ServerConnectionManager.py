@@ -1,7 +1,7 @@
 from fastapi import WebSocket
 from typing import Union
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.crud.server_websocket import save_message, send_notification, set_user_status, save_file
+from app.services.server_websocket import save_message, send_notification, set_user_status, save_file
 from app.schemas.websocket_data.websocket_data import WebsocketData,websocket_data_adaptor
 from app.schemas.websocket_data.notificationall_message import NotificationAllStatus
 from datetime import datetime
