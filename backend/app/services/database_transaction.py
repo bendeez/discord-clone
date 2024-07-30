@@ -14,14 +14,13 @@ class DatabaseTransactionService:
         await self.db.delete(model_instance)
         await self.db.commit()
 
-    async def create(self, model, relationship: Optional[tuple] = None, **attributes):
-        model_instance = model(**attributes)
+    async def create(self, model_instance, relationship: Optional[tuple] = None):
         if relationship is not None:
             attribute, value = relationship
             setattr(model_instance,attribute,value)
         self.db.add(model_instance)
         await self.db.commit()
-        await self.db.refresh(model)
+        await self.db.refresh(model_instance)
         return model_instance
 
     async def update(self, model_instance, attribute, value):

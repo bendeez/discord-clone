@@ -3,12 +3,13 @@ from app.WebsocketManagers.CentralWebsocketServerInterface import central_ws_int
 from app.core.oauth import get_websocket_user
 from app.db.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.schemas.websocket_data.websocket_connection import WebsocketConnection
 
 router = APIRouter()
 
 
 @router.websocket("/ws/server/{token}")
-async def server(token: str, websocket: WebSocket, current_user: dict = Depends(get_websocket_user), db: AsyncSession = Depends(get_db)):
+async def server(token: str, websocket: WebSocket, current_user: WebsocketConnection = Depends(get_websocket_user), db: AsyncSession = Depends(get_db)):
     await central_ws_interface.connect(websocket, current_user,db)
     try:
         while True:

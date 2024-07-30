@@ -12,6 +12,7 @@ class Users(BaseMixin):
     password: Mapped[Optional[str]] = mapped_column()
     profile: Mapped[str] = mapped_column(default=DEFAULT_USER_PROFILE)
     status: Mapped[str] = mapped_column(default="offline")
+
     sent_friends: Mapped[list["Friends"]] = relationship(foreign_keys='Friends.sender', back_populates='sender_user',cascade="all",passive_deletes=True)
     received_friends: Mapped[list["Friends"]] = relationship(foreign_keys='Friends.receiver', back_populates='receiver_user',cascade="all",passive_deletes=True)
     sent_friend_requests: Mapped[list["FriendRequests"]] = relationship(foreign_keys='FriendRequests.sender', back_populates='sender_user',cascade="all",passive_deletes=True)

@@ -3,26 +3,17 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from app.models.servers import Server, Server_User, Server_Messages
 from app.schemas.servers import ServerIn
-from app.firebase_startup import firebase_storage
 from app.models.user import Users
 from app.schemas.websocket_data.server_message import ServerWebsocketAnnouncement
-import uuid
-import base64
-import asyncio
 from app.WebsocketManagers.CentralWebsocketServerInterface import central_ws_interface
+from file_upload import FileUploadService
 from base import BaseService
 
 class ServerService(BaseService):
 
     async def upload_server_profile(self, server: ServerIn):
-        filename = f"{uuid.uuid4()}.jpg"
-        if "," in server.profile:
-            server_profile = server.profile.split(",")[1]
-        else:
-            server_profile = server.profile
-        encoded_image = base64.b64decode(server_profile)
-        await asyncio.to_thread(firebase_storage.child(filename).put, encoded_image)
-        return filename
+        file_url = await FileUploadService.upload(file=server.profile,file_type=".jpg")
+        return file_url
 
     async def create_new_server(self, db: AsyncSession, server: ServerIn, current_user: Users):
         if server.profile:
@@ -74,10 +65,7 @@ class ServerService(BaseService):
 
 
     async def add_user_to_server(self, db: AsyncSession, server_id: int, current_user: Users):
-        server_user = Server_User(username=current_user.username, server_id=server_id)
-        db.add(server_user)
-        await db.commit()
-        await db.refresh(server_user)
+        server_user = await self.transaction.create(model_instance=Server_User(username=current_user.username, server_id=server_id))
         return server_user
 
 

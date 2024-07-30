@@ -23,11 +23,8 @@ class FriendRequestService(BaseService):
         )
         return friend_request.scalars().first()
 
-    async def create_friend_request(self, db: AsyncSession, current_user: Users, remote_user_username: str):
-        request = FriendRequests(sender=current_user.username, receiver=remote_user_username)
-        db.add(request)
-        await db.commit()
-        await db.refresh(request)
+    async def create_friend_request(self, current_user: Users, remote_user_username: str):
+        request = await self.transaction.create(FriendRequests(sender=current_user.username, receiver=remote_user_username))
         return request
 
 

@@ -11,6 +11,7 @@ class Dms(BaseMixin):
     sender: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
     receiver: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
     UniqueConstraint(sender,receiver)
+
     friend: Mapped["Friends"] = relationship(back_populates="dm")
     sender_user: Mapped["Users"] = relationship(foreign_keys=[sender])
     receiver_user: Mapped["Users"] = relationship(foreign_keys=[receiver])
@@ -30,6 +31,7 @@ class Dm_Messages(BaseMixin):
     dm: Mapped[int] = mapped_column(ForeignKey("dms.id", ondelete="CASCADE"))
     serverinviteid: Mapped[Optional[int]] = mapped_column(ForeignKey("server.id"))
     date: Mapped[datetime] = mapped_column(default=datetime.now())
+
     parent_dm: Mapped["Dms"] = relationship(back_populates="dm_messages")
     user: Mapped["Users"] = relationship(back_populates="dm_messages")
     server_invite_info: Mapped["Server"] = relationship()

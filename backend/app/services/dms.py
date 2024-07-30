@@ -9,13 +9,14 @@ from app.WebsocketManagers.CentralWebsocketServerInterface import central_ws_int
 from base import BaseService
 
 class DmService(BaseService):
+
     async def check_already_created_dm(self, db: AsyncSession, current_user: Users, remote_user_username: str):
         dm = await self.get_dm(db=db, current_user=current_user, remote_user_username=remote_user_username)
         if dm is not None:
             return True
         return False
 
-    async def get_dm(db: AsyncSession, current_user: Users, remote_user_username):
+    async def get_dm(self, db: AsyncSession, current_user: Users, remote_user_username):
         dm = await db.execute(
             select(Dms).where(
                 or_(
@@ -40,14 +41,8 @@ class DmService(BaseService):
 
     async def create_new_dm(self, db: AsyncSession, current_user: Users, remote_user_username: str):
         from app.services.friends import get_friend
-        dm = Dms(sender=current_user.username, receiver=remote_user_username)
         friend = await get_friend(db=db,current_user=current_user,remote_user_username=remote_user_username)
-        if friend is not None:
-            friend.dm = dm
-        else:
-            db.add(dm)
-        await db.commit()
-        await db.refresh(dm)
+        dm = await self.transaction.create(model_instance=Dms(sender=current_user.username, receiver=remote_user_username), relationship=("friend", friend))
         return dm
 
 

@@ -15,6 +15,7 @@ class Server_Messages(BaseMixin):
     username: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
     server: Mapped[int] = mapped_column(ForeignKey("server.id", ondelete="CASCADE"))
     date: Mapped[datetime] = mapped_column(default=datetime.now())
+
     user: Mapped["Users"] = relationship(back_populates="server_messages")
     parent_server: Mapped["Server"] = relationship(back_populates="server_messages")
 
@@ -31,6 +32,7 @@ class Server(BaseMixin):
     owner: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
     name: Mapped[str] = mapped_column()
     profile: Mapped[str] = mapped_column(default=DEFAULT_SERVER_PROFILE)
+
     server_users: Mapped[list["Server_User"]] = relationship(back_populates="server",cascade="all",passive_deletes=True)
     server_messages: Mapped[list["Server_Messages"]] = relationship(back_populates="parent_server",cascade="all",passive_deletes=True)
     owner_user: Mapped["Users"] = relationship(back_populates="owned_servers")
@@ -44,6 +46,7 @@ class Server_User(BaseMixin):
     username: Mapped[str] = mapped_column(ForeignKey("users.username", ondelete="CASCADE"))
     server_id: Mapped[int] = mapped_column(ForeignKey("server.id",ondelete="CASCADE"))
     UniqueConstraint(username, server_id)
+
     server: Mapped["Server"] = relationship(back_populates="server_users")
     user: Mapped["Users"] = relationship(back_populates="server_associations")
 

@@ -5,6 +5,7 @@ from app.WebsocketManagers.ServerConnectionManager import ServerConnectionManage
 from app.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.websocket_data.websocket_data import WebsocketData
+from app.schemas.websocket_data.websocket_connection import WebsocketConnection
 from typing import Union
 import json
 
@@ -47,9 +48,10 @@ class CentralWebsocketServerInterface:
             pass via server_manager broadcast method so the message
             will be sent to the pub sub websocket mock
         """
-        self.pub_sub_current_user = {"websocket": self.pub_sub_websocket_mock,
-                                     "dm_ids": [AlwaysTrue()], "server_ids": [AlwaysTrue()],
-                                     "username": AlwaysTrue()}
+        self.pub_sub_current_user = WebsocketConnection(**{"websocket": self.pub_sub_websocket_mock,
+                                                             "username": AlwaysTrue(),"profile":AlwaysTrue(),
+                                                             "dm_ids": [AlwaysTrue()], "server_ids": [AlwaysTrue()],
+                                                             "user_model":AlwaysTrue()})
         self.server_manager.active_connections.append(self.pub_sub_current_user)
 
     async def initialize_pubsub(self):
@@ -57,16 +59,16 @@ class CentralWebsocketServerInterface:
         pubsub_subscriber = await self.pubsub_client.subscribe(channel=settings.PUBSUB_COMMUNICATION_CHANNEL)
         asyncio.create_task(self._pubsub_data_reader(pubsub_subscriber=pubsub_subscriber))
 
-    async def connect(self, websocket: WebSocket, current_user: dict, db: AsyncSession):
+    async def connect(self, websocket: WebSocket, current_user: WebsocketConnection, db: AsyncSession):
         await self.server_manager.connect(websocket=websocket, current_user=current_user, db=db)
 
-    async def disconnect(self, current_user: dict,db: AsyncSession):
-        if not isinstance(current_user["websocket"],PubSubWebsocketMock):
+    async def disconnect(self, current_user: WebsocketConnection,db: AsyncSession):
+        if not isinstance(current_user.websocket,PubSubWebsocketMock):
             await self.server_manager.disconnect(current_user=current_user, db=db)
 
     async def broadcast_from_route(self, sender_username: str, message: dict):
         for connection in self.server_manager.active_connections:
-            if connection["username"] == sender_username and not isinstance(connection["websocket"],PubSubWebsocketMock):
+            if connection.username == sender_username and not isinstance(connection.websocket,PubSubWebsocketMock):
                 await self.server_manager.broadcast(data=message, current_user=connection)
 
     async def broadcast(self, data: Union[dict,WebsocketData], current_user: dict):
@@ -96,9 +98,10 @@ class CentralWebsocketServerInterface:
                 """
                 if "pubsub_publisher" in message:
                     if message["pubsub_publisher"] != self.pubsub_client.id:
-                        current_user = {"websocket":self.pub_sub_websocket_mock,
-                                        "username":message.get("username"),"profile":message.get("profile"),
-                                        "dm_ids": [AlwaysTrue()], "server_ids": [AlwaysTrue()]}
+                        current_user = WebsocketConnection(**{"websocket":self.pub_sub_websocket_mock,
+                                                            "username":message.get("username"),"profile":message.get("profile"),
+                                                            "dm_ids": [AlwaysTrue()], "server_ids": [AlwaysTrue()],
+                                                            "user_model":AlwaysTrue()})
                         await self.server_manager.broadcast(data=message,current_user=current_user)
 
 

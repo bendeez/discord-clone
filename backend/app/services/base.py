@@ -6,7 +6,7 @@ class BaseService:
 
     def __init__(self, transaction: Optional[DatabaseTransactionService] = None):
         if transaction is None:
-            db = DatabaseTransactionService()
+            transaction = DatabaseTransactionService()
         self.transaction = transaction
 
     @classmethod

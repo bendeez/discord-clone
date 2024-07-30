@@ -10,6 +10,7 @@ import asyncio
 from base import BaseService
 
 class UserService(BaseService):
+
     async def check_user_exists(self, db: AsyncSession, remote_user_username: str):
         user = await get_user(db=db,remote_user_username=remote_user_username)
         if user is not None:
@@ -20,12 +21,9 @@ class UserService(BaseService):
         user_exists = await db.execute(select(Users).where(Users.username == remote_user_username))
         return user_exists.scalars().first()
 
-    async def create_new_user(self, db: AsyncSession, username: str, email: str, password: str):
+    async def create_new_user(self, username: str, email: str, password: str):
         hashed_password = hash(password)
-        new_user = Users(username=username, email=email, password=hashed_password)
-        db.add(new_user)
-        await db.commit()
-        await db.refresh(new_user)
+        new_user = await self.transaction.create(model_instance=Users(username=username, email=email, password=hashed_password))
         return new_user
 
 
@@ -51,3 +49,7 @@ class UserService(BaseService):
 
     async def delete_current_user(self, user: Users):
         await self.transaction.delete(user)
+
+    async def set_user_status(self, db:AsyncSession,status:str,current_user:dict):
+        current_user["user_model"].status = status
+        await db.commit()
