@@ -21,9 +21,5 @@ class UserCreated(UserBase):
     email: str
 
 
-class UserTokenOut(BaseModel):
-    access_token: str
-
-
 class UserUpdateProfile(BaseModel):
     profile: str

@@ -11,10 +11,9 @@ from base import BaseService
 class FriendService(BaseService):
 
     async def get_friend_by_users(
-        self, db: AsyncSession, current_user: Users, remote_user_username
+        self, current_user: Users, remote_user_username
     ):
-        friend_request = await db.execute(
-            select(Friends).where(
+        stmt = select(Friends).where(
                 or_(
                     and_(
                         Friends.sender == remote_user_username,
@@ -26,7 +25,7 @@ class FriendService(BaseService):
                     ),
                 )
             )
-        )
+        friend_request = await self.transaction.execute(stmt)
         return friend_request.scalars().first()
 
     async def delete_current_friend(self, friend: Friends):

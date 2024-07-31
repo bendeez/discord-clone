@@ -1,13 +1,11 @@
 from database_transaction import DatabaseTransactionService
-from typing import Optional
+from fastapi import Depends
+from app.db.database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class BaseService:
-    def __init__(self, transaction: Optional[DatabaseTransactionService] = None):
-        if transaction is None:
-            transaction = DatabaseTransactionService()
-        self.transaction = transaction
+    def __init__(self, db: AsyncSession =Depends(get_db)):
+        self.transaction = DatabaseTransactionService(db=db)
 
-    @classmethod
-    def get_instance(cls):
-        return cls()
+

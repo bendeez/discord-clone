@@ -1,12 +1,10 @@
-from fastapi import Depends
-from app.db.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
 
 class DatabaseTransactionService:
 
-    def __init__(self, db: AsyncSession = Depends(get_db)):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
     async def delete(self, model_instance, ongoing_transaction=False):

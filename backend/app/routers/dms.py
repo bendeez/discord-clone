@@ -2,19 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.friend_requests import FriendRequestIn
 from app.schemas.dms import DmsOut, DmMessagesOut, DmInformationOut, DmCreated
 from app.db.database import get_db
-from app.core.oauth import get_current_user
+from app.services.authentication import get_current_user
 from app.models.user import Users
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.dms import (
-    check_already_created_dm,
-    create_new_dm,
-    get_all_dms,
-    check_user_in_dm,
-    get_all_dm_information,
-    get_all_dm_messages,
-    send_new_dm_notification,
+    DmService
 )
-from app.services.user import check_user_exists
+from app.services.friends import FriendService
+from app.services.user import UserService
 from typing import List
 
 router = APIRouter()
@@ -24,31 +19,34 @@ router = APIRouter()
 async def create_dm(
     friend_request: FriendRequestIn,
     current_user: Users = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    dm_service: DmService = Depends(DmService),
+    user_service: UserService = Depends(UserService),
+    friend_service: FriendService = Depends(FriendService)
 ):
     if friend_request.username == current_user.username:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Cannot create a dm with yourself",
         )
-    user_exists = await check_user_exists(
-        db=db, remote_user_username=friend_request.username
+    user_exists = await user_service.get_user_by_username(
+        remote_user_username=friend_request.username
     )
     if not user_exists:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="User does not exists"
         )
-    already_dm = await check_already_created_dm(
-        db=db, current_user=current_user, remote_user_username=friend_request.username
+    already_dm = await dm_service.get_dm_by_users(
+        current_user=current_user, remote_user_username=friend_request.username
     )
     if already_dm:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="There is already a dm"
         )
-    dm = await create_new_dm(
-        db=db, current_user=current_user, remote_user_username=friend_request.username
+    friend = await friend_service.get_friend_by_users(current_user=current_user,remote_user_username=friend_request.username)
+    dm = await dm_service.create_new_dm(
+            current_user=current_user, remote_user_username=friend_request.username, friend=friend
     )
-    await send_new_dm_notification(current_user=current_user, dm=dm)
+    await dm_service.send_new_dm_notification(current_user=current_user, dm=dm)
     return dm
 
 

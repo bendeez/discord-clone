@@ -12,11 +12,11 @@ from base import BaseService
 
 class UserService(BaseService):
 
-    async def get_user(self, db: AsyncSession, remote_user_username: str):
-        user_exists = await db.execute(
+    async def get_user_by_username(self, remote_user_username: str):
+        user = await self.transaction.execute(
             select(Users).where(Users.username == remote_user_username)
         )
-        return user_exists.scalars().first()
+        return user.scalars().first()
 
     async def create_new_user(self, username: str, email: str, password: str):
         hashed_password = hash(password)
@@ -56,6 +56,7 @@ class UserService(BaseService):
         return user_data.scalars().first()
 
     async def delete_current_user(self, user: Users):
+
         await self.transaction.delete(user)
 
     async def set_user_status(self, db: AsyncSession, status: str, current_user: dict):

@@ -5,7 +5,6 @@ from app.schemas.user import (
     UserOut,
     UserCreated,
     UserUpdateProfile,
-    UserTokenOut,
 )
 from app.services.user import (
     check_user_exists,
@@ -13,6 +12,7 @@ from app.services.user import (
     update_current_profile_picture,
     get_user,
 )
+from app.schemas.authentication import TokenCreate
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.core.oauth import get_current_user, create_access_token
@@ -35,7 +35,7 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     return user
 
 
-@router.post("/login", response_model=UserTokenOut)
+@router.post("/login", response_model=TokenCreate)
 async def login(user: UserIn, db: AsyncSession = Depends(get_db)):
     existing_user = await get_user(db=db, remote_user_username=user.username)
     if existing_user is None:
@@ -48,7 +48,7 @@ async def login(user: UserIn, db: AsyncSession = Depends(get_db)):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
     token = create_access_token(data={"username": existing_user.username})
-    return {"access_token": token}
+    return token
 
 
 @router.get("/usercredentials", response_model=UserOut)
