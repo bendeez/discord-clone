@@ -7,21 +7,12 @@ from base import BaseService
 
 
 class FriendRequestService(BaseService):
-    async def check_friend_request(
-        self, db: AsyncSession, current_user: Users, remote_user_username: str
-    ):
-        friend_request = await self.get_friend_request(
-            db=db, current_user=current_user, remote_user_username=remote_user_username
-        )
-        if friend_request is not None:
-            return True
-        return False
 
     async def get_friend_request(
         self, db: AsyncSession, current_user: Users, remote_user_username: str
     ):
         friend_request = await db.execute(
-            select(FriendRequests).filter(
+            select(FriendRequests).where(
                 or_(
                     and_(
                         FriendRequests.sender == remote_user_username,

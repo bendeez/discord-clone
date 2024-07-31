@@ -5,12 +5,14 @@ from typing import Optional
 
 
 class DatabaseTransactionService:
+
     def __init__(self, db: AsyncSession = Depends(get_db)):
         self.db = db
 
-    async def delete(self, model_instance):
+    async def delete(self, model_instance, ongoing_transaction=False):
         await self.db.delete(model_instance)
-        await self.db.commit()
+        if not ongoing_transaction:
+            await self.db.commit()
 
     async def create(self, model_instance, relationship: Optional[str] = None, relationship_value = None):
         if relationship is not None and relationship_value is not None:

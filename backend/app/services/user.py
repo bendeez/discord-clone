@@ -11,11 +11,6 @@ from base import BaseService
 
 
 class UserService(BaseService):
-    async def check_user_exists(self, db: AsyncSession, remote_user_username: str):
-        user = await get_user(db=db, remote_user_username=remote_user_username)
-        if user is not None:
-            return True
-        return False
 
     async def get_user(self, db: AsyncSession, remote_user_username: str):
         user_exists = await db.execute(

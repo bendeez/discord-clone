@@ -13,17 +13,6 @@ from base import BaseService
 
 class DmService(BaseService):
 
-    async def check_already_created_dm(
-        self, db: AsyncSession, current_user: Users, remote_user_username: str
-    ):
-
-        dm = await self.get_dm(
-            db=db, current_user=current_user, remote_user_username=remote_user_username
-        )
-        if dm is not None:
-            return True
-        return False
-
     async def get_dm_by_users(self, current_user: Users, remote_user_username):
         stmt = select(Dms).where(
                 or_(
