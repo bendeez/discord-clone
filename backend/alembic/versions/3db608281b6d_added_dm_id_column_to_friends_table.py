@@ -1,4 +1,4 @@
-"""added dm id column to friends table
+"""added dms id column to friends table
 
 Revision ID: 3db608281b6d
 Revises: 1ecab0804c22

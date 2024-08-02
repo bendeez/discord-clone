@@ -1,9 +1,11 @@
-from app.services.dms import create_new_dm
+from app.dms.service import create_new_dm
 from app.services.server_websocket import save_message
-from app.services.notifications import get_notification_by_dm_id
-from app.schemas.websocket_data.notification_message import NotificationMessage
-from app.schemas.websocket_data.dm_message import DmWebsocketText
-from app.WebsocketManagers.CentralWebsocketServerInterface import central_ws_interface
+from app.notifications.service import get_notification_by_dm_id
+from app.websocket_server.schemas.notification_message import NotificationMessage
+from app.websocket_server.schemas.dm_message import DmWebsocketText
+from app.websocket_server.websocket_managers.CentralWebsocketServerInterface import (
+    central_ws_interface,
+)
 import asyncio
 from utils import RequestMethod
 
@@ -24,13 +26,13 @@ async def test_get_notification(
     remote_ws, remote_ws_user = await websocket_connection(token=remote_token)
     await central_ws_interface.broadcast(
         data=DmWebsocketText(
-            **{"dm": dm.id, "text": "hi", "otheruser": current_user.username}
+            **{"dms": dm.id, "text": "hi", "otheruser": current_user.username}
         ).model_dump(),
         current_user=remote_ws_user,
     )
     await current_ws.recv()  # status notification
     await current_ws.recv()  # status notification
-    await current_ws.recv()  # dm message
+    await current_ws.recv()  # dms message
     data = await current_ws.recv()
     assert (
         data
@@ -38,7 +40,7 @@ async def test_get_notification(
             **{
                 "sender": remote_user.username,
                 "profile": remote_user.profile,
-                "dm": dm.id,
+                "dms": dm.id,
                 "receiver": current_user.username,
                 "count": None,
             }
@@ -53,7 +55,7 @@ async def test_get_notification(
     assert data == [
         {
             "id": data[0]["id"],
-            "dm": dm.id,
+            "dms": dm.id,
             "count": 1,
             "sender": remote_user.username,
             "profile": remote_user.profile,
@@ -77,7 +79,7 @@ async def test_delete_notfication(
     await save_message(
         data=NotificationMessage(
             **{
-                "dm": dm.id,
+                "dms": dm.id,
                 "sender": remote_user.username,
                 "receiver": current_user.username,
                 "profile": remote_user.profile,
