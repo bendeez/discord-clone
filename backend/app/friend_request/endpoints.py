@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.friend_requests.schemas import (
+from app.friend_request.schemas import (
     FriendRequestIn,
     FriendRequestOut,
     FriendRequestCreated,
 )
-from app.db.database import get_db
-from app.friend_requests.service import (
+from app.database import get_db
+from app.friend_request.service import (
     check_friend_request,
     create_friend_request,
     get_all_friend_requests,
     get_friend_request,
     delete_current_friend_request,
 )
-from app.friends.service import check_already_friends
+from app.friend.service import check_already_friends
 from app.user.service import check_user_exists
 from app.user.models import Users
 from app.core.oauth import get_current_user
@@ -57,7 +57,7 @@ async def send_friend_request(
     if already_friends:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="You are already friends with that user",
+            detail="You are already friend with that user",
         )
     friend_request = await create_friend_request(
         db=db, current_user=current_user, remote_user_username=friend_request.username

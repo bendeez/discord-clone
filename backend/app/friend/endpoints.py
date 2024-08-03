@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.friends.schemas import FriendsOut, FriendIn, FriendCreated
-from app.db.database import get_db
+from app.friend.schemas import FriendsOut, FriendIn, FriendCreated
+from app.database import get_db
 from app.core.oauth import get_current_user
 from app.user.models import Users
-from app.friend_requests.service import get_friend_request
-from app.friends.service import (
+from app.friend_request.service import get_friend_request
+from app.friend.service import (
     create_friend,
     get_all_friends,
     get_friend,
@@ -46,7 +46,7 @@ async def accept_friend_request(
     return friend
 
 
-@friend_router.get("/friends", response_model=List[FriendsOut])
+@friend_router.get("/friend", response_model=List[FriendsOut])
 async def get_friends(
     current_user: Users = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ):
@@ -66,6 +66,6 @@ async def delete_friend(
     if current_friend is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not friends with this user",
+            detail="You are not friend with this user",
         )
     await delete_current_friend(db=db, friend=current_friend)

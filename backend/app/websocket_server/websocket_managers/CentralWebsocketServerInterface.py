@@ -6,11 +6,11 @@ from app.websocket_server.websocket_managers.RedisPubSubManager import (
 from app.websocket_server.websocket_managers.ServerConnectionManager import (
     ServerConnectionManager,
 )
-from app.dms.service import DmService
+from app.dm.service import DmService
 from app.websocket_server.schemas.notification_message import NotificationMessage
 from app.file_upload import FileUploadService
-from app.servers.service import ServerService
-from app.notifications.service import NotificationService
+from app.server.service import ServerService
+from app.notification.service import NotificationService
 from app.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.websocket_server.schemas.websocket_data import (
@@ -122,13 +122,13 @@ class CentralWebsocketServerInterface:
         await self.server_manager.broadcast(data=data, current_user=current_user)
         async with create_task_group() as task:
             if data.pubsub_publisher is None:
-                if data.chat == "dms":
+                if data.chat == "dm":
                     task.start_soon(DmService().save_dm_message, data)
                     task.start_soon(
                         self.broadcast,
                         NotificationMessage(
                             **{
-                                "dms": data.dm,
+                                "dm": data.dm,
                                 "sender": data.username,
                                 "receiver": data.otheruser,
                                 "profile": data.profile,

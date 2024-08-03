@@ -11,7 +11,7 @@ class Notifications(BaseMixin):
         ForeignKey("users.username", ondelete="CASCADE")
     )
     UniqueConstraint(sender, receiver)
-    dm: Mapped[int] = mapped_column(ForeignKey("dms.id", ondelete="CASCADE"))
+    dm: Mapped[int] = mapped_column(ForeignKey("dm.id", ondelete="CASCADE"))
     count: Mapped[int] = mapped_column(default=1)
 
     parent_dm: Mapped["Dms"] = relationship(

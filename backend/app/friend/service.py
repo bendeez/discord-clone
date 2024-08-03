@@ -1,11 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.friends.models import Friends
-from app.friend_requests.models import FriendRequests
+from app.friend.models import Friends
+from app.friend_request.models import FriendRequests
 from app.user.models import Users
-from app.dms.models import Dms
+from app.dm.models import Dms
 from typing import Optional
 from sqlalchemy import select, union, and_, or_
-from base import BaseService
+from app.base import BaseService
 
 
 class FriendService(BaseService):
@@ -41,7 +41,7 @@ class FriendService(BaseService):
             model_instance=Friends(
                 sender=remote_user_username, receiver=current_user.username
             ),
-            relationship="dms",
+            relationship="dm",
             relationship_value=dm,
         )
         return friend

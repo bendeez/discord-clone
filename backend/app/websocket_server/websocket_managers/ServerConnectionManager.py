@@ -39,7 +39,7 @@ class ServerConnectionManager:
         if not isinstance(data, WebsocketData):
             data = websocket_data_adaptor.validate_python(data)
         chat = data.chat
-        if chat == "dms":  # checks if the message is being sent to a dms
+        if chat == "dm":  # checks if the message is being sent to a dm
             await self.broadcast_dm(data=data, current_user=current_user)
         elif chat == "server":
             await self.broadcast_server(data=data, current_user=current_user)
@@ -53,7 +53,7 @@ class ServerConnectionManager:
     ):
         if (
             data.dm in current_user["dm_ids"]
-        ):  # checks if the dms id is a part of the user's dms
+        ):  # checks if the dm id is a part of the user's dm
             """
                 fills in attributes that the server is suppose to set
             """
@@ -141,10 +141,10 @@ class ServerConnectionManager:
 
     def add_valid_server_or_dm(self, usernames: list, type: str, id: str):
         """
-        adds the authorized dms or server ids to the current_user dict
+        adds the authorized dm or server ids to the current_user dict
         so the user has access to the entity when a user has recently
         (same websocket connection before and after the creation)
-        created or joined a dms or server
+        created or joined a dm or server
         """
         for connection in self.active_connections:
             if connection.username in usernames:

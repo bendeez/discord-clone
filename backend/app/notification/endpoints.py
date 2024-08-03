@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from app.notifications.schemas import NotificationIn, NotificationOut
-from app.db.database import get_db
+from app.notification.schemas import NotificationIn, NotificationOut
+from app.database import get_db
 from app.core.oauth import get_current_user
-from app.notifications.service import (
+from app.notification.service import (
     get_all_notifications,
     get_notification_by_dm_id,
     delete_current_notification,
@@ -14,12 +14,12 @@ from typing import List
 notification_router = APIRouter()
 
 
-@notification_router.get("/notifications", response_model=List[NotificationOut])
+@notification_router.get("/notification", response_model=List[NotificationOut])
 async def get_notifications(
     current_user: Users = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ):
     """
-    only dms message notifications
+    only dm message notification
     """
     notifications = await get_all_notifications(db=db, current_user=current_user)
     return notifications
@@ -32,7 +32,7 @@ async def delete_notification(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    only dms message notifications
+    only dm message notification
     """
     notification = await get_notification_by_dm_id(
         db=db, notification_dm_id=notification.id

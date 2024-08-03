@@ -1,39 +1,38 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, union, case, func, or_, and_
 from app.websocket_server.schemas.notification_message import NotificationNewDm
-from app.dms.models import Dms, Dm_Messages
-from app.servers.models import Server
-from app.user.models import Users
-from app.friends.models import Friends
+from app.dm.models import Dms, Dm_Messages
+from app.server.models import Server
+from app.friend.models import Friends
 from app.websocket_server.websocket_managers.CentralWebsocketServerInterface import (
     central_ws_interface,
 )
-from app.redis_client import redis_client
+from app.redis import redis_client
 from typing import Optional
-from base import BaseService
+from app.base_service import BaseService
 
 
 class DmService(BaseService):
 
-    async def get_dm_by_users(self, current_user: Users, remote_user_id: int) -> Dms:
-        dm = await self.transaction.get_by_user_ids(model=Dms, current_user=current_user,
+    async def get_dm_by_users(self, current_user_id: int, remote_user_id: int) -> Dms:
+        dm = await self.transaction.get_by_user_ids(model=Dms, current_user_id=current_user_id,
                                                     remote_id=remote_user_id)
         return dm
 
-    async def check_user_in_dm(self, current_user: Users, dm_id: int) -> bool:
-        user_in_dm = await self.transaction.check_user_in_entity(model=Dms,current_user=current_user,
+    async def check_user_in_dm(self, current_user_id: int, dm_id: int) -> bool:
+        user_in_dm = await self.transaction.check_user_in_entity(model=Dms,current_user_id=current_user_id,
                                                                  entity_id=dm_id)
         return user_in_dm
 
     async def create_new_dm(
         self,
-        current_user: Users,
+        current_user_id: int,
         remote_user_username: str,
         friend: Optional[Friends] = None,
     ):
         dm = await self.transaction.create(
             model_instance=Dms(
-                sender=current_user.username, receiver=remote_user_username
+                sender=current_user_id, receiver=remote_user_username
             ),
             relationship="friend",
             relationship_value=friend,
@@ -123,8 +122,8 @@ class DmService(BaseService):
 
     async def send_new_dm_notification(self, current_user: Users, dm: Dms):
         """
-        add the dms id to the users' dm_ids list so they can
-        send messages in that dms
+        add the dm id to the users' dm_ids list so they can
+        send messages in that dm
         """
         central_ws_interface.add_valid_server_or_dm(
             usernames=[dm.sender, dm.receiver], type="dm_ids", id=dm.id

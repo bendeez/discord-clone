@@ -24,25 +24,25 @@ class DmWebsocketMessageBase(BaseModel):
 
 
 class DmWebsocketText(DmWebsocketMessageBase):
-    chat: Literal["dms"] = "dms"
+    chat: Literal["dm"] = "dm"
     type: Literal["text"] = "text"
     text: str
 
 
 class DmWebsocketFile(DmWebsocketMessageBase):
-    chat: Literal["dms"] = "dms"
+    chat: Literal["dm"] = "dm"
     type: Literal["file"] = "file"
     file: str
     filetype: str
 
 
 class DmWebsocketTextAndFile(DmWebsocketText, DmWebsocketFile):
-    chat: Literal["dms"] = "dms"
+    chat: Literal["dm"] = "dm"
     type: Literal["textandfile"] = "textandfile"
 
 
 class DmWebsocketLink(DmWebsocketMessageBase):
-    chat: Literal["dms"] = "dms"
+    chat: Literal["dm"] = "dm"
     type: Literal["link"] = "link"
     serverinviteid: int
     servername: str

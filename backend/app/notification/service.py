@@ -2,10 +2,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import aliased, selectinload
 from sqlalchemy import and_
-from app.notifications.models import Notifications
+from app.notification.models import Notifications
 from app.user.models import Users
 from app.websocket_server.schemas.notification_message import Notification
-from base import BaseService
+from app.base import BaseService
 
 
 class NotificationService(BaseService):

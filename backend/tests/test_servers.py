@@ -1,12 +1,12 @@
 import asyncio
-from app.servers.schemas import ServerMessagesOut, ServerIn
+from app.server.schemas import ServerMessagesOut, ServerIn
 from app.websocket_server.schemas.server_message import (
     ServerWebsocketText,
     ServerWebsocketAnnouncement,
 )
-from app.servers.service import create_new_server
+from app.server.service import create_new_server
 from app.services.server_websocket import save_message
-from app.redis_client import redis_client
+from app.redis import redis_client
 from uuid import uuid4
 from utils import RequestMethod
 import base64
@@ -61,7 +61,7 @@ async def test_get_servers(http_request, current_user, current_user_token, db):
         db=db,
     )
     response = await http_request(
-        "/servers", method=RequestMethod.GET, token=current_user_token
+        "/server", method=RequestMethod.GET, token=current_user_token
     )
     assert response.status_code == 200
     data = response.json()
@@ -161,7 +161,7 @@ async def test_join_server(
         "server_id": server.id,
     }
     """
-        first two are status notifications
+        first two are status notification
     """
     await current_ws.recv()
     await current_ws.recv()

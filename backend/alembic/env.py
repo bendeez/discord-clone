@@ -3,8 +3,8 @@ from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from app.db.base import BaseMixin
-from app.db.database import SQLALCHEMY_DATABASE_URL
+from app.base import BaseMixin
+from app.database import SQLALCHEMY_DATABASE_URL
 from alembic import context
 
 # this is the Alembic Config object, which provides

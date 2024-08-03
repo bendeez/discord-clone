@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.servers.schemas import (
+from app.server.schemas import (
     UserServer,
     ServersOut,
     ServerUserOut,
@@ -8,11 +8,11 @@ from app.servers.schemas import (
     ServerCreated,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.servers.schemas import ServerIn
-from app.db.database import get_db
+from app.server.schemas import ServerIn
+from app.database import get_db
 from app.core.oauth import get_current_user
 from app.user.models import Users
-from app.servers.service import (
+from app.server.service import (
     create_new_server,
     get_all_servers,
     check_user_in_server,
@@ -24,7 +24,7 @@ from app.servers.service import (
     send_join_server_message,
 )
 from typing import List
-from app.redis_client import redis_client
+from app.redis import redis_client
 
 server_router = APIRouter()
 
@@ -44,7 +44,7 @@ async def create_server(
     return new_server
 
 
-@server_router.get("/servers", response_model=List[ServersOut])
+@server_router.get("/server", response_model=List[ServersOut])
 async def get_servers(
     current_user: Users = Depends(get_current_user), db: AsyncSession = Depends(get_db)
 ):

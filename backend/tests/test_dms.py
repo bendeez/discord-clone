@@ -1,9 +1,9 @@
 from utils import RequestMethod
-from app.dms.service import create_new_dm
+from app.dm.service import create_new_dm
 from app.services.server_websocket import save_message
 from app.websocket_server.schemas.dm_message import DmWebsocketText
 from app.websocket_server.schemas.notification_message import NotificationNewDm
-from app.dms.schemas import DmMessagesOut
+from app.dm.schemas import DmMessagesOut
 from datetime import datetime
 
 
@@ -14,9 +14,9 @@ async def test_create_dm(
     remote_ws, _ = await websocket_connection(token=remote_token)
     await websocket_connection(
         token=current_user_token
-    )  # current_user websocket connection to send create dms message (application does that)
+    )  # current_user websocket connection to send create dm message (application does that)
     response = await http_request(
-        "/dms",
+        "/dm",
         method=RequestMethod.POST,
         json={"username": remote_user.username},
         token=current_user_token,
@@ -30,7 +30,7 @@ async def test_create_dm(
         "receiver": remote_user.username,
     }
     """
-            first 2 are status update notifications for each
+            first 2 are status update notification for each
             user
     """
     await remote_ws.recv()
@@ -56,10 +56,10 @@ async def test_invalid_post_dm(
         current_user=current_user, remote_user_username=remote_user.username, db=db
     )
     """
-        create a dms that's already been created
+        create a dm that's already been created
     """
     response = await http_request(
-        "/dms",
+        "/dm",
         method=RequestMethod.POST,
         json={"username": remote_user.username},
         token=current_user_token,
@@ -73,7 +73,7 @@ async def test_get_dms(http_request, current_user, current_user_token, remote_us
         current_user=current_user, remote_user_username=remote_user.username, db=db
     )
     response = await http_request(
-        "/dms", method=RequestMethod.GET, token=current_user_token
+        "/dm", method=RequestMethod.GET, token=current_user_token
     )
     assert response.status_code == 200
     data = response.json()
@@ -95,7 +95,7 @@ async def test_get_dm_user_by_id(
         current_user=current_user, remote_user_username=remote_user.username, db=db
     )
     response = await http_request(
-        f"/dms/{dm.id}", method=RequestMethod.GET, token=current_user_token
+        f"/dm/{dm.id}", method=RequestMethod.GET, token=current_user_token
     )
     assert response.status_code == 200
     data = response.json()
@@ -109,7 +109,7 @@ async def test_get_dm_user_by_id(
 
 async def test_get_dm_forbidden(http_request, current_user_token):
     response = await http_request(
-        "/dms/4897", method=RequestMethod.GET, token=current_user_token
+        "/dm/4897", method=RequestMethod.GET, token=current_user_token
     )
     assert response.status_code == 403
 
@@ -123,7 +123,7 @@ async def test_get_dm_messages(
     )
     dm_message = DmWebsocketText(
         **{
-            "dms": dm.id,
+            "dm": dm.id,
             "otheruser": remote_user.username,
             "username": current_user.username,
             "profile": current_user.profile,

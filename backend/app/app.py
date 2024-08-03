@@ -4,11 +4,11 @@ from app.websocket_server.websocket_managers.CentralWebsocketServerInterface imp
     central_ws_interface,
 )
 import contextlib
-from app.dms.endpoints import dm_router
-from app.friend_requests.endpoints import friend_request_router
-from app.friends.endpoints import friend_router
-from app.notifications.endpoints import notification_router
-from app.servers.endpoints import server_router
+from app.dm.endpoints import dm_router
+from app.friend_request.endpoints import friend_request_router
+from app.friend.endpoints import friend_router
+from app.notification.endpoints import notification_router
+from app.server.endpoints import server_router
 from app.user.endpoints import user_router
 from app.websocket_server.endpoints import websocket_router
 from exception_handlers import add_exception_handlers

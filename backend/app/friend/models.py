@@ -16,7 +16,7 @@ class Friends(BaseMixin):
     sender_user: Mapped["Users"] = relationship(foreign_keys=[sender])
     receiver_user: Mapped["Users"] = relationship(foreign_keys=[receiver])
     dm_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey("dms.id", ondelete="CASCADE")
+        ForeignKey("dm.id", ondelete="CASCADE")
     )
     dm: Mapped["Dms"] = relationship(back_populates="friend")
 

@@ -1,15 +1,15 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from app.servers.models import Server, Server_User, Server_Messages
-from app.servers.schemas import ServerIn
+from app.server.models import Server, Server_User, Server_Messages
+from app.server.schemas import ServerIn
 from app.user.models import Users
 from app.websocket_server.schemas.server_message import ServerWebsocketAnnouncement
 from app.websocket_server.websocket_managers.CentralWebsocketServerInterface import (
     central_ws_interface,
 )
 from file_upload import FileUploadService
-from base import BaseService
+from app.base import BaseService
 
 
 class ServerService(BaseService):

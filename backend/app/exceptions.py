@@ -9,3 +9,10 @@ class DiscordError(Exception):
         self.message = message
         self.status_code = status_code
         self.headers = headers
+
+class DiscordUnauthorized(DiscordError):
+    def __init__(self, message: str = "Invalid credentials", status_code: int = 401) -> None:
+        super().__init__(
+            message,
+            status_code
+        )

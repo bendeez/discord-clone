@@ -3,7 +3,7 @@ from app.websocket_server.websocket_managers.CentralWebsocketServerInterface imp
     central_ws_interface,
 )
 from app.core.oauth import get_websocket_user
-from app.db.database import get_db
+from app.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.websocket_server.schemas.websocket_connection import WebsocketConnection
 

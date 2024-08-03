@@ -4,46 +4,56 @@ from sqlalchemy.orm import selectinload
 from app.user.models import Users
 from fastapi import UploadFile
 from app.firebase_startup import firebase_storage
-from app.utils import hash
+from app.auth.service import HashService
+from app.file_upload import FileUploadService
+from fastapi import Depends
 import uuid
 import asyncio
 from app.base_service import BaseService
+from fastapi import HTTPException, status
+from typing import Optional
 
 
 class UserService(BaseService):
-    async def get_user_by_username(self, remote_user_username: str):
-        user = await self.transaction.execute(
-            select(Users).where(Users.username == remote_user_username)
-        )
-        return user.scalars().first()
+
+    def __init__(self, hash_service: Optional[HashService] = Depends(HashService),
+                 file_upload_service: Optional[FileUploadService] = Depends(FileUploadService)):
+        super().__init__()
+        self.hash_service = hash_service
+        self.file_upload_service = file_upload_service
+
+    async def get_user_by_id(self, user_id: int):
+        user = await self.transaction.get_by_filters(model=Users,id=user_id)
+        return user
 
     async def create_new_user(self, username: str, email: str, password: str):
-        hashed_password = hash(password)
-        new_user = await self.transaction.create(
-            model_instance=Users(
-                username=username, email=email, password=hashed_password
+        existing_user = await self.transaction.get_by_filters(model=Users, username=username)
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="User already exists"
             )
+        hashed_password = self.hash_service.hash(password)
+        new_user = await self.transaction.create(
+            model=Users,
+            username=username,
+            email=email,
+            password=hashed_password
         )
         return new_user
 
     async def upload_profile_picture(self, file: UploadFile):
-        file_type = file.filename.split(".")[-1]
-        filename = f"{uuid.uuid4()}.{file_type}"
-        await asyncio.to_thread(firebase_storage.child(filename).put, file.file.read())
-        return filename
+        file_url = await self.file_upload_service.upload(file=file.file,file_type="jpg")
+        return file_url
 
     async def update_current_profile_picture(
-        self, db: AsyncSession, current_user: Users, file: UploadFile
+        self, current_user: Users, file: UploadFile
     ):
-        filename = await self.upload_profile_picture(file)
-        current_user.profile = f"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8"
-        await db.commit()
-        return {
-            "profile": f"https://firebasestorage.googleapis.com/v0/b/discord-83cd2.appspot.com/o/{filename}?alt=media&token=c27e7352-b75a-4468-b14b-d06b74839bd8"
-        }
+        file_url = await self.upload_profile_picture(file)
+        await self.transaction.update(model_instance=current_user, profile=file_url)
+        return file_url
 
-    async def get_user_data(self, db: AsyncSession, username) -> Users:
-        user_data = await db.execute(
+    async def get_ws_user_entities(self, user_id: int) -> Users:
+        ws_user_entities = await db.execute(
             select(Users)
             .where(Users.username == username)
             .options(

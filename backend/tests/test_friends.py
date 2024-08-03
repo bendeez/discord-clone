@@ -1,5 +1,5 @@
-from app.friend_requests.service import create_friend_request
-from app.friends.service import create_friend, get_friend
+from app.friend_request.service import create_friend_request
+from app.friend.service import create_friend, get_friend
 from utils import RequestMethod
 
 
@@ -90,7 +90,7 @@ async def test_get_friends(
         current_friend_request=friend_request,
     )
     response = await http_request(
-        path="/friends", method=RequestMethod.GET, token=current_user_token
+        path="/friend", method=RequestMethod.GET, token=current_user_token
     )
     assert response.status_code == 200
     data = response.json()

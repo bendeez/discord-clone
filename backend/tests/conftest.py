@@ -2,8 +2,8 @@ import pytest
 import httpx
 from utils import http_request, RequestMethod
 from app.app import app
-from app.db.database import SessionLocal, engine
-from app.db.base import BaseMixin
+from app.database import SessionLocal, engine
+from app.base import BaseMixin
 from app.user.service import create_new_user, delete_current_user
 from app.core.oauth import create_access_token, get_websocket_user
 from app.websocket_server.websocket_managers.CentralWebsocketServerInterface import (

@@ -1,9 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, and_
 from sqlalchemy.orm import aliased
-from app.friend_requests.models import FriendRequests
+from app.friend_request.models import FriendRequests
 from app.user.models import Users
-from base import BaseService
+from app.base import BaseService
 
 
 class FriendRequestService(BaseService):
